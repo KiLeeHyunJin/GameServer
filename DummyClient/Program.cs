@@ -5,15 +5,49 @@ using ServerCore;
 
 namespace DummyClient
 {
+   
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            string host = Dns.GetHostName();
+            IPHostEntry iPHost = Dns.GetHostEntry(host);
+            IPAddress ipAddr = iPHost.AddressList[0];
+            IPEndPoint endPoint = new(ipAddr, 7777);
+
+            Connector connector = new();
+            connector.Connect(endPoint, () => { return new GameSession(); });
+
+            while(true)
+            {
+                Socket socket = new(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    socket.Connect(endPoint);
+                    Console.WriteLine($"Connected To {socket.RemoteEndPoint}");
+
+
+                    socket.Shutdown(SocketShutdown.Both);
+                    socket.Close();
+                }
+                catch(Exception e)
+                {
+
+                }
+            }
+            
+        }
+    }
     class GameSession : Session
     {
         public override void OnConnected(EndPoint endPoint)
-            {
-            Console.WriteLine($"");
+        {
+            Console.WriteLine($"On Connected : {endPoint}");
             for (int i = 0; i < 5; i++)
             {
-                byte[] bytes = Encoding.UTF8.GetBytes("Welcome");
-                int sendByte = socket.Send(bytes);
+                byte[] sendBuff = Encoding.UTF8.GetBytes("Hello World");
+                Send(sendBuff);
             }
         }
 
@@ -24,7 +58,7 @@ namespace DummyClient
 
         public override void OnRecv(ArraySegment<byte> buff)
         {
-            Console.WriteLine($"{Encoding.UTF8.GetString(buff.Array, buff.Offset, buff.Count)}");
+            Console.WriteLine($"[From Server] : {Encoding.UTF8.GetString(buff.Array, buff.Offset, buff.Count)}");
         }
 
         public override void OnSend(int byteSize)
@@ -33,51 +67,4 @@ namespace DummyClient
         }
     }
 
-
-    internal class Program
-    {
-
-        static void SendWait()
-        {
-            while (true)
-            {
-
-            }
-        }
-
-        static void ReciveWait()
-        {
-            while (true)
-            {       
-
-            }
-        }
-
-        static void Main(string[] args)
-        {
-            string host = Dns.GetHostName();
-            IPHostEntry iPHost = Dns.GetHostEntry(host);
-            IPAddress ipAddr = iPHost.AddressList[0];
-            IPEndPoint endPoint = new(ipAddr, 7777);
-
-            Socket socket = new(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            socket.Connect(endPoint);
-
-            Console.WriteLine($"Connected To {socket.RemoteEndPoint}");
-
-
-            byte[] sendBuff = Encoding.UTF8.GetBytes("Hello World");
-            int sendBytes = socket.Send(sendBuff);
-
-            byte[] recvBuff = new byte[1024];
-            int recvBytes = socket.Receive(recvBuff);
-            string recvString = Encoding.UTF8.GetString(recvBuff, 0, recvBytes);
-            Console.WriteLine($"[From Server] {recvString}");
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
-
-
-        }
-    }
 }

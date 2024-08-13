@@ -5,16 +5,16 @@ using System.Text;
 
 namespace Server
 {
-
     class GameSession : Session
     {
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"");
-            byte[] bytes = Encoding.UTF8.GetBytes("Welcome");
-            Send(bytes);
-            Thread.Sleep(100);
-            Disconnect();
+            for (int i = 0; i < 5; i++)
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes("Welcome");
+                int sendByte = socket.Send(bytes);
+            }
         }
 
         public override void OnDisconnected(EndPoint endPoint)
