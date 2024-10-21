@@ -6,7 +6,11 @@ namespace ServerCore
     public abstract class Session
     {
         const int recvBufferMaxSize = 1024;
+        
+        protected Socket socket;
+        int disconnectState = default;
 
+        RecBuffer _recBuffer = new(recvBufferMaxSize); 
 
         readonly object lck = new();
         readonly Queue<byte[]> sendQueue = new();
@@ -18,14 +22,10 @@ namespace ServerCore
         EventHandler<SocketAsyncEventArgs> recvEventHandler;
         EventHandler<SocketAsyncEventArgs> sendEventHandler;
 
-        protected Socket socket;
-        byte[] recvBuff;
-
-        int disconnectState = default;
-
+        //byte[] recvBuff;
 
         public abstract void OnConnected(EndPoint endPoint);
-        public abstract void OnRecv(ArraySegment<byte> buff);
+        public abstract int OnRecv(ArraySegment<byte> buff);
         public abstract void OnSend(int byteSize);
         public abstract void OnDisconnected(EndPoint endPoint);
 
@@ -42,11 +42,11 @@ namespace ServerCore
             recvArg.Completed += recvEventHandler;
             sendArg.Completed += sendEventHandler;
 
-            if (recvBuff == null)
-            {
-                recvBuff = new byte[recvBufferMaxSize];
-                recvArg.SetBuffer(recvBuff, 0, recvBufferMaxSize);
-            }
+            //if (recvBuff == null)
+            //{
+            //    recvBuff = new byte[recvBufferMaxSize];
+            //    recvArg.SetBuffer(recvBuff, 0, recvBufferMaxSize);
+            //}
 
             RegisterRecv();
         }
@@ -95,6 +95,9 @@ namespace ServerCore
 
         void RegisterRecv()
         {
+            _recBuffer.Clear();
+            ArraySegment<byte> segment = _recBuffer.WriteSegment;
+            recvArg.SetBuffer(segment.Array, segment.Offset, segment.Count);
             bool pending = socket.SendAsync(recvArg);
             if (pending == false)
             {
@@ -111,13 +114,25 @@ namespace ServerCore
                 {
                     try
                     {
-                        sendArg.BufferList = null;
-                        sendPendingBufList.Clear();
-                        OnSend(sendArg.BytesTransferred);
-                        if (sendQueue.Count > 0)
+                        if(_recBuffer.OnWrite(args.BytesTransferred) == false)
                         {
-                            RegisterSend();
+                            Disconnect();
+                            return;
                         }
+                        int progressLen = OnRecv(_recBuffer.WriteSegment);
+                        if (progressLen < 0 || _recBuffer.DataSize < progressLen)
+                        {
+                            Disconnect();
+                            return;
+                        }
+                        RegisterSend();
+
+                        if(_recBuffer.OnRead(progressLen) == false)
+                        {
+                            Disconnect();
+                            return;
+                        }
+
                     }
                     catch (Exception e)
                     {

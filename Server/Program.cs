@@ -22,9 +22,10 @@ namespace Server
             Console.WriteLine($"On Disconneted");
         }
 
-        public override void OnRecv(ArraySegment<byte> buff)
+        public override int OnRecv(ArraySegment<byte> buff)
         {
             Console.WriteLine($"{Encoding.UTF8.GetString(buff.Array, buff.Offset, buff.Count)}");
+            return buff.Count;
         }
 
         public override void OnSend(int byteSize)
