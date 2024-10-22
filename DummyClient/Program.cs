@@ -1,70 +1,45 @@
-﻿using System.Net.Sockets;
-using System.Net;
+﻿using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using ServerCore;
 
 namespace DummyClient
 {
-   
+
 
     internal class Program
     {
         static void Main(string[] args)
         {
-            string host = Dns.GetHostName();
-            IPHostEntry iPHost = Dns.GetHostEntry(host);
-            IPAddress ipAddr = iPHost.AddressList[0];
-            IPEndPoint endPoint = new(ipAddr, 7777);
+            string hostName = Dns.GetHostName(); //로컬 호스트 이름 가져옴
+            IPHostEntry ipHost = Dns.GetHostEntry(hostName);//해당 호스트의 IP엔트리를
+            IPAddress address = ipHost.AddressList[0];//첫번째 주소를 가져옴
+            IPEndPoint endPoint = new IPEndPoint(address, 7777); //최종 주소(첫번쨰 주소의 7777포트번호)
 
-            Connector connector = new();
-            connector.Connect(endPoint, () => { return new GameSession(); });
-
-            while(true)
+            try
             {
-                Socket socket = new(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                try
-                {
-                    socket.Connect(endPoint);
-                    Console.WriteLine($"Connected To {socket.RemoteEndPoint}");
+                //휴대폰 설정
+                Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
+                //입장 요청
+                socket.Connect(endPoint);
 
-                    socket.Shutdown(SocketShutdown.Both);
-                    socket.Close();
-                }
-                catch(Exception e)
-                {
+                Console.WriteLine($"[Connect To] {socket.RemoteEndPoint.ToString()}");
+                byte[] sendBuffet = Encoding.UTF8.GetBytes("Hellow World");
+                int sendBytes = socket.Send(sendBuffet);
 
-                }
+                byte[] recvBuffer = new byte[1024];
+                int recBytes = socket.Receive(recvBuffer);
+                string recvData = Encoding.UTF8.GetString(recvBuffer, 0, recBytes);
+
+                Console.WriteLine($"From Server {recvData}");
+                //socket.Shutdown(SocketShutdown.Both);
+
             }
-            
-        }
-    }
-    class GameSession : Session
-    {
-        public override void OnConnected(EndPoint endPoint)
-        {
-            Console.WriteLine($"On Connected : {endPoint}");
-            for (int i = 0; i < 5; i++)
+            catch (Exception e)
             {
-                byte[] sendBuff = Encoding.UTF8.GetBytes("Hello World");
-                Send(sendBuff);
+                Console.WriteLine(e.Message);
             }
-        }
-
-        public override void OnDisconnected(EndPoint endPoint)
-        {
-            Console.WriteLine($"On Disconneted");
-        }
-
-        public override int OnRecv(ArraySegment<byte> buff)
-        {
-            Console.WriteLine($"[From Server] : {Encoding.UTF8.GetString(buff.Array, buff.Offset, buff.Count)}");
-            return buff.Count;
-        }
-
-        public override void OnSend(int byteSize)
-        {
-            Console.WriteLine($" Transferred : {byteSize}");
+            Console.ReadLine();
         }
     }
 
