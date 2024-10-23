@@ -1,23 +1,26 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    public class Session
+
+    public abstract class Session
     {
         Socket _socket;
         int _disconnected = 0;
-        
+
         object _lock = new object();
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
+
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
+
+        public abstract void OnConnected(EndPoint endPoint);
+        public abstract void OnRecv(ArraySegment<byte> buffer);
+        public abstract void OnSend(int numOfByte);
+        public abstract void OnDisconnected(EndPoint endPoint);
 
         public void Start(Socket socket)
         {
@@ -32,7 +35,7 @@ namespace ServerCore
 
         public void Send(byte[] sendBuff)
         {
-            lock(_lock)
+            lock (_lock)
             {
                 _sendQueue.Enqueue(sendBuff);
                 if (_pendingList.Count == 0)
@@ -40,8 +43,6 @@ namespace ServerCore
                     RegisterSend();
                 }
             }
-            //_sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
-            //RegisterSend();
         }
 
         public void Disconnect()
@@ -49,6 +50,7 @@ namespace ServerCore
             if (Interlocked.Exchange(ref _disconnected, 1) == 1)
                 return;
 
+            OnDisconnected(_socket.RemoteEndPoint);
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
@@ -58,8 +60,6 @@ namespace ServerCore
 
         void RegisterSend()
         {
-
-            _pendingList.Clear();
             while (_sendQueue.Count > 0)
             {
                 byte[] buff = _sendQueue.Dequeue();
@@ -70,7 +70,7 @@ namespace ServerCore
 
 
             bool pending = _socket.SendAsync(_sendArgs);
-            if(pending == false)
+            if (pending == false)
             {
                 OnSendCompleted(null, _sendArgs);
             }
@@ -87,7 +87,7 @@ namespace ServerCore
 
         void OnSendCompleted(object sender, SocketAsyncEventArgs args)
         {
-            lock(_lock)
+            lock (_lock)
             {
                 if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
                 {
@@ -95,14 +95,12 @@ namespace ServerCore
                     {
                         _sendArgs.BufferList = null;
                         _pendingList.Clear();
+                        OnSend(_sendArgs.BytesTransferred);
 
-                        Console.WriteLine($"Transferred bytes : {_sendArgs.BytesTransferred}");
-
-                        if(_sendArgs.Count > 0)
+                        if (_sendArgs.Count > 0)
                         {
                             RegisterSend();
                         }
-
                     }
                     catch (Exception e)
                     {
@@ -114,7 +112,7 @@ namespace ServerCore
                     Disconnect();
                 }
             }
-            
+
         }
 
 
@@ -124,8 +122,7 @@ namespace ServerCore
             {
                 try
                 {
-                    string recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);
-                    Console.WriteLine($"[From Client] {recvData}");
+                    OnRecv(new ArraySegment<byte>(args.Buffer, args.Offset, args.BytesTransferred));
                     RegisterRecv();
                 }
                 catch (Exception e)

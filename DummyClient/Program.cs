@@ -10,8 +10,9 @@ namespace DummyClient
     {
         static void Main(string[] args)
         {
-            string hostName = Dns.GetHostName(); //로컬 호스트 이름 가져옴
-            IPHostEntry ipHost = Dns.GetHostEntry(hostName);//해당 호스트의 IP엔트리를
+            //string hostName = Dns.GetHostName(); //로컬 호스트 이름 가져옴
+            //Console.WriteLine(hostName);
+            IPHostEntry ipHost = Dns.GetHostEntry("DESKTOP-CQOT7QA");//해당 호스트의 IP엔트리를
             IPAddress address = ipHost.AddressList[0];//첫번째 주소를 가져옴
             IPEndPoint endPoint = new IPEndPoint(address, 7777); //최종 주소(첫번쨰 주소의 7777포트번호)
 
