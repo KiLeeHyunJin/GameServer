@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ServerCore
 {
-
-
     public class Listener
     {
         Socket _listenSocket;
@@ -41,9 +34,8 @@ namespace ServerCore
 
         void OnAccpetCompleted(object sender, SocketAsyncEventArgs args)
         {
-            if(args.SocketError == SocketError.Success)
+            if (args.SocketError == SocketError.Success)
             {
-                //TODO
                 Session session = _sessionFactory.Invoke();
                 session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
@@ -58,7 +50,7 @@ namespace ServerCore
 
         public Socket Accept()
         {
-            return  _listenSocket.Accept();
+            return _listenSocket.Accept();
         }
 
     }
