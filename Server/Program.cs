@@ -9,11 +9,16 @@ namespace Server
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected : {endPoint}");
-
             byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Sever!");
-            Send(sendBuff);
-            Thread.Sleep(1000);
-            Disconnect();
+
+            ArraySegment<byte> openSegement = SendBufferHelper.Open(sendBuff.Length);
+            Array.Copy(sendBuff, 0, openSegement.Array, openSegement.Offset, sendBuff.Length);
+            ArraySegment<byte> closeSegement = SendBufferHelper.Close(sendBuff.Length);
+            Send(closeSegement);
+
+
+            //Thread.Sleep(1000);
+            //Disconnect();
         }
 
         public override void OnDisconnected(EndPoint endPoint)
@@ -30,24 +35,36 @@ namespace Server
 
         public override void OnSend(int numOfByte)
         {
-            Console.WriteLine($"Transferred bytes : {numOfByte}");
+            //Console.WriteLine($"Transferred bytes : {numOfByte}");
 
         }
     }
+
+
     internal class Program
     {
         static Listener _listener = new Listener();
 
         static void Main(string[] args)
         {
-            string hostName = Dns.GetHostName(); //로컬 호스트 이름 가져옴
-            IPHostEntry ipHost = Dns.GetHostEntry(hostName);//해당 호스트의 IP엔트리를
-            IPAddress address = ipHost.AddressList[0];//첫번째 주소를 가져옴
-            IPEndPoint endPoint = new IPEndPoint(address, 7777); //최종 주소(첫번쨰 주소의 7777포트번호)
-            //문지기 휴대폰 생성
+            const int portNum = 55555;
 
+            try
+            {
+                //string ipName = Dns.GetHostName();
+                //IPAddress[] ips = Dns.GetHostAddresses(ipName);
+                //IPAddress ip = ips[0];
 
-            _listener.Init(endPoint, () => { return new GameSession(); });
+                //IPEndPoint localEndPoint = new IPEndPoint(ip.MapToIPv4(), 55555);
+                //문지기 휴대폰 생성
+                //Console.WriteLine(localEndPoint);
+                _listener.Init(portNum ,() => { return new GameSession(); });
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+
             Console.WriteLine("Listening...");
 
             while (true)
@@ -55,6 +72,6 @@ namespace Server
                 ;
             }
         }
-
     }
+
 }

@@ -1,0 +1,13 @@
+ 
+ bool atckId,
+ bool id , bool skillType, short damValue
+
+ bool banIdx,
+ bool id, bool pickIdx,
+  
+ string chat 
+ string matchUid
+ 
+
+
+

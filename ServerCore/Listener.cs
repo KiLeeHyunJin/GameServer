@@ -8,16 +8,18 @@ namespace ServerCore
         Socket _listenSocket;
         Func<Session> _sessionFactory;
 
-        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
+        public void Init(int portNum, Func<Session> sessionFactory)
         {
-            _listenSocket = new(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            _sessionFactory += sessionFactory;
+            _listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
 
-            _listenSocket.Bind(endPoint);
+            _listenSocket.Bind(new IPEndPoint(IPAddress.Any, portNum));
             _listenSocket.Listen(10);
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
+            _sessionFactory += sessionFactory;
+
             RegisterAccept(args);
         }
 

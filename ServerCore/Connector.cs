@@ -7,15 +7,20 @@ namespace ServerCore
     public class Connector
     {
         Func<Session> _sessionFactory;
+        Lobby lobby = new Lobby();
+
         public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory)
         {
             _sessionFactory = sessionFactory;
-            Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
+            Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            socket.ReceiveTimeout = 30;
+            
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += OnConnectedCompleted;
-            args.RemoteEndPoint = endPoint;
             args.UserToken = socket;
+            args.RemoteEndPoint = endPoint;
+            args.Completed += OnConnectedCompleted;
+
             RegistConnect(args);
         }
 
@@ -26,7 +31,6 @@ namespace ServerCore
             {
                 return;
             }
-
             bool pending = socket.ConnectAsync(args);
             if(pending == false)
             {
@@ -34,11 +38,12 @@ namespace ServerCore
             }
         }
 
-        void OnConnectedCompleted(object sender, SocketAsyncEventArgs args)
+        void OnConnectedCompleted(object? sender, SocketAsyncEventArgs args)
         {
             Console.WriteLine("OnConnectedCompleted");
             if(args.SocketError == SocketError.Success)
             {
+                //lobby.EnterLobby(args.ConnectSocket, args.RemoteEndPoint);
                 Session session = _sessionFactory.Invoke();
                 session.Start(args.ConnectSocket);
                 session.OnConnected(args.RemoteEndPoint);
