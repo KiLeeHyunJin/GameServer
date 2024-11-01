@@ -8,14 +8,18 @@ namespace ServerCore
         Socket _listenSocket;
         Func<Session> _sessionFactory;
 
-        public void Init(int portNum, Func<Session> sessionFactory)
+        public void Init(Func<Session> sessionFactory)
         {
-            _listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
+            _listenSocket = new Socket(
+                AddressFamily.InterNetwork, 
+                SocketType.Stream, 
+                ProtocolType.Tcp);
+            //_listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
 
-            _listenSocket.Bind(new IPEndPoint(IPAddress.Any, portNum));
+            _listenSocket.Bind(new IPEndPoint(IPAddress.Any, Session.PortNum));
             _listenSocket.Listen(10);
 
+            Console.WriteLine($"Open Socket {IPAddress.Any}:{Session.PortNum}");
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
             _sessionFactory += sessionFactory;
@@ -34,17 +38,15 @@ namespace ServerCore
             }
         }
 
-        void OnAccpetCompleted(object sender, SocketAsyncEventArgs args)
+        void OnAccpetCompleted(object? sender, SocketAsyncEventArgs args)
         {
+            Console.WriteLine(args.SocketError.ToString());
+
             if (args.SocketError == SocketError.Success)
             {
                 Session session = _sessionFactory.Invoke();
                 session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
-            }
-            else
-            {
-                Console.WriteLine(args.SocketError.ToString());
             }
 
             RegisterAccept(args);

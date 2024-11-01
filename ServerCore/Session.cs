@@ -5,8 +5,11 @@ using System.Text;
 
 namespace ServerCore
 {
+
     public abstract class Session
     {
+        public readonly static int PortNum = 55555;
+
         Socket _socket;
         int _disconnected = 0;
 

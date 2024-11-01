@@ -44,12 +44,9 @@ namespace DummyClient
     {
         static void Main(string[] args)
         {
-            const int portNum = 55555;
-
             string domain = "pkc-5000.shop";
             string hostName = Dns.GetHostName(); //로컬 호스트 이름 가져옴
-            
-            IPAddress serverCom = IPAddress.Parse("52.79.72.106");
+
             IPAddress[] addresses = Dns.GetHostAddresses(domain);//해당 호스트의 IP엔트리를
 
             Thread.Sleep(1000);
@@ -60,7 +57,7 @@ namespace DummyClient
                 {
                     if (address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        IPEndPoint remoteEndPoint = new IPEndPoint(address, portNum); //최종 주소(첫번쨰 주소의 7777포트번호)
+                        IPEndPoint remoteEndPoint = new IPEndPoint(address, Session.PortNum); //최종 주소(첫번쨰 주소의 7777포트번호)
 
                         Console.WriteLine(remoteEndPoint);
 
@@ -71,7 +68,7 @@ namespace DummyClient
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e.Message); 
             }
 
 

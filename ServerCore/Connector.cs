@@ -13,10 +13,15 @@ namespace ServerCore
         {
             _sessionFactory = sessionFactory;
 
-            Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.ReceiveTimeout = 30;
-            
+            Socket socket = new Socket(
+                AddressFamily.InterNetwork, 
+                SocketType.Stream, 
+                ProtocolType.Tcp);
+
+            socket.ReceiveTimeout = 30000;
+            socket.Bind(new IPEndPoint(IPAddress.Any, Session.PortNum));
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+
             args.UserToken = socket;
             args.RemoteEndPoint = endPoint;
             args.Completed += OnConnectedCompleted;
@@ -29,6 +34,7 @@ namespace ServerCore
             Socket socket = args.UserToken as Socket;
             if (socket == null)
             {
+                Console.WriteLine($"socket invalid exception");
                 return;
             }
             bool pending = socket.ConnectAsync(args);

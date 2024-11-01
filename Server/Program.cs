@@ -47,18 +47,9 @@ namespace Server
 
         static void Main(string[] args)
         {
-            const int portNum = 55555;
-
             try
             {
-                //string ipName = Dns.GetHostName();
-                //IPAddress[] ips = Dns.GetHostAddresses(ipName);
-                //IPAddress ip = ips[0];
-
-                //IPEndPoint localEndPoint = new IPEndPoint(ip.MapToIPv4(), 55555);
-                //문지기 휴대폰 생성
-                //Console.WriteLine(localEndPoint);
-                _listener.Init(portNum ,() => { return new GameSession(); });
+                _listener.Init(() => { return new GameSession(); });
             }
             catch(Exception e)
             {
