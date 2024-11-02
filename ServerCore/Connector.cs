@@ -14,12 +14,12 @@ namespace ServerCore
             _sessionFactory = sessionFactory;
 
             Socket socket = new Socket(
-                AddressFamily.InterNetwork, 
-                SocketType.Stream, 
-                ProtocolType.Tcp);
+                Define.AddressType,
+                Define.SocketType,
+                Define.ProtocolType);
 
             socket.ReceiveTimeout = 30000;
-            socket.Bind(new IPEndPoint(IPAddress.Any, Session.PortNum));
+            //socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
 
             args.UserToken = socket;

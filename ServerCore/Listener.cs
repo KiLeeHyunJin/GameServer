@@ -11,15 +11,15 @@ namespace ServerCore
         public void Init(Func<Session> sessionFactory)
         {
             _listenSocket = new Socket(
-                AddressFamily.InterNetwork, 
-                SocketType.Stream, 
-                ProtocolType.Tcp);
+                Define.AddressType,
+                Define.SocketType,
+                Define.ProtocolType);
             //_listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
 
-            _listenSocket.Bind(new IPEndPoint(IPAddress.Any, Session.PortNum));
+            _listenSocket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
             _listenSocket.Listen(10);
 
-            Console.WriteLine($"Open Socket {IPAddress.Any}:{Session.PortNum}");
+            Console.WriteLine($"Open Socket {IPAddress.Any}:{Define.PortNum}");
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
             _sessionFactory += sessionFactory;
