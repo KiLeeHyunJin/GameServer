@@ -40,7 +40,6 @@ namespace ServerCore
 
         void OnAccpetCompleted(object? sender, SocketAsyncEventArgs args)
         {
-            Console.WriteLine(args.SocketError.ToString());
 
             if (args.SocketError == SocketError.Success)
             {
@@ -48,7 +47,10 @@ namespace ServerCore
                 session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
             }
-
+            else
+            {
+                Console.WriteLine(args.SocketError.ToString());
+            }
             RegisterAccept(args);
         }
 

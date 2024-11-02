@@ -24,7 +24,7 @@ namespace ServerCore
                 {
                     break;
                 }
-                Console.WriteLine($"bufferCount : {buffer.Count}, dataSize {dataSize}");
+                //Console.WriteLine($"bufferCount : {buffer.Count}, dataSize {dataSize}");
 
                 OnRecvPacket(new ArraySegment<byte>(
                     buffer.Array, 

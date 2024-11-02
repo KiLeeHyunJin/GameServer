@@ -24,7 +24,7 @@ namespace DummyClient
                     if (address.AddressFamily == AddressFamily.InterNetwork)
                     {
                         IPEndPoint remoteEndPoint = new IPEndPoint(address, ServerCore.Define.PortNum);
-                        Console.WriteLine(remoteEndPoint);
+                        Console.WriteLine($"[RemoteAddress] : {remoteEndPoint} ");
 
                         Connector connector = new Connector();
                         connector.Connect(remoteEndPoint, () => { return new ServerSession(); });

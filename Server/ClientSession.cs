@@ -19,47 +19,55 @@ namespace Server
     class PlayerInfoReq : Packet
     {
         public long playerId;
+        public string name;
 
         public PlayerInfoReq()
         {
             packetId = (ushort)PacketID.PlayerInfoReq;
         }
 
-        public override void Read(ArraySegment<byte> s)
+        public override void Read(ArraySegment<byte> segment)
         {
-            int count = 0;
-            //ushort size = (ushort)BitConverter.ToInt16(s.Array, s.Offset);
-            count += 2;
-            //ushort id = (ushort)BitConverter.ToInt16(s.Array, s.Offset + count);
-            count += 2;
+            int count = 4;
+            ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
 
-            this.playerId = BitConverter.ToInt64(new ReadOnlySpan<byte>(s.Array, s.Offset + count, s.Count - count));
-            count += 8;
+            this.playerId   = BitConverter.ToInt64(s.Slice(count, s.Length - count));
+            count += sizeof(long);
+
+            //string
+            ushort nameLen  = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+            count += sizeof(ushort);
+
+            name = Encoding.Unicode.GetString(s.Slice(count, nameLen));
         }
 
         public override ArraySegment<byte> Write()
         {
-            ArraySegment<byte> s = SendBufferHelper.Open(4096);
-            short count = 0;
+            ArraySegment<byte> segment = SendBufferHelper.Open(4096);
+            ushort count = 0;
 
             bool success = true;
 
-            count += 2;
-            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), this.packetId);
+            Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
+            count += sizeof(ushort);
 
-            count += 2;
-            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), this.playerId);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.packetId);
+            count += sizeof(ushort);
 
-            count += 8;
-            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), count);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
+            count += sizeof(long);
 
-            if (success == false)
-            {
-                return null;
-            }
+            //string
+            ushort nameLen = (ushort)Encoding.Unicode.GetByteCount(this.name);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen);
+            count += sizeof(ushort);
 
-            ArraySegment<byte> closeSegement = SendBufferHelper.Close(count);
-            return s;
+            Array.Copy(Encoding.Unicode.GetBytes(name), 0, segment.Array, count, nameLen);
+            count += nameLen;
+
+            success &= BitConverter.TryWriteBytes(s, count);
+
+            return success ? SendBufferHelper.Close(count) : null;
         }
     }
 
@@ -75,7 +83,7 @@ namespace Server
     {
         public override void OnConnected(EndPoint endPoint)
         {
-            Console.WriteLine($"OnConnected : {endPoint}");
+            Console.WriteLine($"OnConnected Client : {endPoint}");
             //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Sever!");
 
             //ArraySegment<byte> openSegement = SendBufferHelper.Open(sendBuff.Length);
@@ -108,7 +116,7 @@ namespace Server
                     {
                         PlayerInfoReq p = new PlayerInfoReq();
                         p.Read(buffer);
-                        Console.WriteLine($"PlayerInfoReq Player ID : {p.playerId}");
+                        Console.WriteLine($"PlayerInfoReq Player ID : {p.playerId} name : {p.name}");
                     }
                     break;
                 case PacketID.PlayerInfoOk:

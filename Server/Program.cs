@@ -1,6 +1,4 @@
 ﻿using ServerCore;
-using System.Net;
-using System.Text;
 
 namespace Server
 {
@@ -13,7 +11,7 @@ namespace Server
             {
                 _listener.Init(() => { return new ClientSession(); });
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
             }
@@ -24,11 +22,6 @@ namespace Server
             {
                 ;
             }
-        }
-
-        static void ClearHeap()
-        {
-            GC.Collect();
         }
     }
 
