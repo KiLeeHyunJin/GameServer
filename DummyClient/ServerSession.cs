@@ -8,21 +8,68 @@ using System.Threading.Tasks;
 
 namespace DummyClient
 {
-    class Packet
+    public abstract class Packet
     {
         public ushort size;
         public ushort packetId;
-
+        public abstract ArraySegment<byte> Write();
+        public abstract void Read(ArraySegment<byte> s);
     }
 
-    class PlaeyrInfoReq : Packet
+    class PlayerInfoReq : Packet
     {
+        public long playerId;
 
+        public PlayerInfoReq()
+        {
+            packetId = (ushort)PacketID.PlayerInfoReq;
+        }
+
+        public override void Read(ArraySegment<byte> s)
+        {
+            int count = 0;
+            //ushort size = (ushort)BitConverter.ToInt16(s.Array, s.Offset);
+            count += 2;
+            //ushort id = (ushort)BitConverter.ToInt16(s.Array, s.Offset + count);
+            count += 2;
+
+            this.playerId = BitConverter.ToInt64(new ReadOnlySpan<byte>(s.Array, s.Offset + count, s.Count - count));
+            count += 8;
+        }
+
+        public override ArraySegment<byte> Write()
+        {
+            ArraySegment<byte> s = SendBufferHelper.Open(4096);
+            short count = 0;
+
+            bool success = true;
+
+            count += 2;
+            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), this.packetId);
+
+            count += 2;
+            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), this.playerId);
+
+            count += 8;
+            success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), (short)4);
+
+            if(success == false)
+            {
+                return null;
+            }    
+
+            ArraySegment<byte> closeSegement = SendBufferHelper.Close(count);
+            return closeSegement;
+        }
     }
-    class PlayerInfoOk : Packet
+
+
+    public enum PacketID
     {
-
+        PlayerInfoReq = 1,
+        PlayerInfoOk = 2,
     }
+
 
     class ServerSession : PacketSession
     {
@@ -31,10 +78,29 @@ namespace DummyClient
             Console.WriteLine($"OnConnected : {endPoint}");
             byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Sever!");
 
-            ArraySegment<byte> openSegement = SendBufferHelper.Open(sendBuff.Length);
-            Array.Copy(sendBuff, 0, openSegement.Array, openSegement.Offset, sendBuff.Length);
-            ArraySegment<byte> closeSegement = SendBufferHelper.Close(sendBuff.Length);
-            Send(closeSegement);
+            PlayerInfoReq packet = new PlayerInfoReq() {    playerId = 1001 };
+
+
+            #region
+            //byte[] size = BitConverter.GetBytes(packet.size);
+            //byte[] packetId = BitConverter.GetBytes(packet.packetId);
+            //byte[] playerId = BitConverter.GetBytes(packet.playerId);
+
+            //Array.Copy(size     , 0, s.Array, s.Offset + count, size.Length);
+            //count += 2;
+
+            //Array.Copy(packetId , 0, s.Array, s.Offset + count, packetId.Length);
+            //count += 2;
+
+            //Array.Copy(playerId , 0, s.Array, s.Offset + count, playerId.Length);
+            //count += 8;
+            #endregion
+
+            ArraySegment<byte> s = packet.Write();
+            if(s != null)
+            {
+                Send(s);
+            }
 
 
             //Thread.Sleep(1000);

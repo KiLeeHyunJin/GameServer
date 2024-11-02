@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ServerCore
 {
@@ -19,10 +20,11 @@ namespace ServerCore
                     break;
                 }
                 ushort dataSize = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
-                if(buffer.Count < dataSize)
+                if (buffer.Count < dataSize)
                 {
                     break;
                 }
+                Console.WriteLine($"bufferCount : {buffer.Count}, dataSize {dataSize}");
 
                 OnRecvPacket(new ArraySegment<byte>(
                     buffer.Array, 
@@ -36,7 +38,7 @@ namespace ServerCore
                     buffer.Count - dataSize);
             }
 
-            return 0;
+            return processLen;
         }
         public abstract void OnRecvPacket(ArraySegment<byte> buffer);
     }
