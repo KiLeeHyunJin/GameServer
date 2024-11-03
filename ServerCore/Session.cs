@@ -1,8 +1,6 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using ServerCore.Base;
 
 namespace ServerCore
 {
@@ -13,9 +11,9 @@ namespace ServerCore
         {
             int processLen = 0;
 
-            while(true)
+            while (true)
             {
-                if (buffer.Count  < HeaderSize)
+                if (buffer.Count < HeaderSize)
                 {
                     break;
                 }
@@ -27,14 +25,14 @@ namespace ServerCore
                 //Console.WriteLine($"bufferCount : {buffer.Count}, dataSize {dataSize}");
 
                 OnRecvPacket(new ArraySegment<byte>(
-                    buffer.Array, 
-                    buffer.Offset, 
+                    buffer.Array,
+                    buffer.Offset,
                     dataSize));
 
                 processLen += dataSize;
                 buffer = new ArraySegment<byte>(
-                    buffer.Array, 
-                    buffer.Offset + dataSize, 
+                    buffer.Array,
+                    buffer.Offset + dataSize,
                     buffer.Count - dataSize);
             }
 
@@ -163,7 +161,7 @@ namespace ServerCore
             {
                 try
                 {
-                    if(_recvBuffer.OnWrite(args.BytesTransferred) == false)
+                    if (_recvBuffer.OnWrite(args.BytesTransferred) == false)
                     {
                         Disconnect();
                         return;
@@ -171,13 +169,13 @@ namespace ServerCore
 
                     int processLen = OnRecv(_recvBuffer.ReadSegment);
 
-                    if(processLen < 0 || _recvBuffer.DataSize < processLen)
+                    if (processLen < 0 || _recvBuffer.DataSize < processLen)
                     {
                         Disconnect();
                         return;
                     }
 
-                    if(_recvBuffer.OnRead(processLen) == false)
+                    if (_recvBuffer.OnRead(processLen) == false)
                     {
                         Disconnect();
                         return;

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 
 
-namespace ServerCore
+namespace ServerCore.Base
 {
     public class Connector
     {
@@ -38,7 +38,7 @@ namespace ServerCore
                 return;
             }
             bool pending = socket.ConnectAsync(args);
-            if(pending == false)
+            if (pending == false)
             {
                 OnConnectedCompleted(null, args);
             }
@@ -47,7 +47,7 @@ namespace ServerCore
         void OnConnectedCompleted(object? sender, SocketAsyncEventArgs args)
         {
             Console.WriteLine("OnConnectedCompleted");
-            if(args.SocketError == SocketError.Success)
+            if (args.SocketError == SocketError.Success)
             {
                 //lobby.EnterLobby(args.ConnectSocket, args.RemoteEndPoint);
                 Session session = _sessionFactory.Invoke();

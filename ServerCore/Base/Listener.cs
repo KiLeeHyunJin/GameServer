@@ -1,13 +1,13 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace ServerCore
+namespace ServerCore.Base
 {
     public class Listener
     {
         Socket _listenSocket;
         Func<Session> _sessionFactory;
-
+        Lobby lobby;
         public void Init(Func<Session> sessionFactory)
         {
             _listenSocket = new Socket(
@@ -23,6 +23,8 @@ namespace ServerCore
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
             _sessionFactory += sessionFactory;
+
+            lobby = new();
 
             RegisterAccept(args);
         }
@@ -43,7 +45,9 @@ namespace ServerCore
 
             if (args.SocketError == SocketError.Success)
             {
-                Session session = _sessionFactory.Invoke();
+                Session session = null;
+                session = lobby.EnterLobby(args.AcceptSocket, args.AcceptSocket.RemoteEndPoint);
+                //session = _sessionFactory.Invoke();
                 session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
             }

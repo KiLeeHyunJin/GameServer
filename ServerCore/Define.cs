@@ -15,6 +15,11 @@ namespace ServerCore
 
         readonly public static int              PortNum             = 55555;
         readonly public static int              SendBufferChunkSize = 4096 * 100;
+        public enum PacketID
+        {
+            PlayerInfoReq = 1,
+            PlayerInfoOk = 2,
+        }
 
 
     }

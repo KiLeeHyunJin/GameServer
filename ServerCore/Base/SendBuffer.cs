@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServerCore
+namespace ServerCore.Base
 {
     public class SendBufferHelper
     {
         /// <summary>
         /// 전역이긴 하나 해당 스레드에서만 사용할 수 있는 고유한 전역 메소드인 ThreadLocal로 사용.
         /// </summary>
-        public static ThreadLocal<SendBuffer> CurrentBuffer = 
+        public static ThreadLocal<SendBuffer> CurrentBuffer =
             new ThreadLocal<SendBuffer>(() => { return null; });
 
 
@@ -24,11 +24,11 @@ namespace ServerCore
         /// <returns></returns>
         public static ArraySegment<byte> Open(int reserveSize)
         {
-            if(CurrentBuffer.Value == null) 
+            if (CurrentBuffer.Value == null)
             {
                 CurrentBuffer.Value = new SendBuffer(Define.SendBufferChunkSize);
             }
-            if(CurrentBuffer.Value.FreeSize < reserveSize)
+            if (CurrentBuffer.Value.FreeSize < reserveSize)
             {
                 CurrentBuffer.Value = new SendBuffer(Define.SendBufferChunkSize);
             }
@@ -43,8 +43,8 @@ namespace ServerCore
         /// 전송 확정 크기
         /// </param>
         public static ArraySegment<byte> Close(int usedSize)
-        {   
-            return CurrentBuffer.Value.Close(usedSize);  
+        {
+            return CurrentBuffer.Value.Close(usedSize);
         }
     }
 
@@ -59,9 +59,9 @@ namespace ServerCore
         byte[] _buffer;
         int _usedSize = 0;
 
-        public int FreeSize 
-        { 
-            get { return _buffer.Length - _usedSize; } 
+        public int FreeSize
+        {
+            get { return _buffer.Length - _usedSize; }
         }
         public SendBuffer(int chunkSize)
         {

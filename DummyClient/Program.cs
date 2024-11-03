@@ -1,4 +1,4 @@
-﻿using ServerCore;
+﻿using ServerCore.Base;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -37,7 +37,7 @@ namespace DummyClient
             }
 
 
-            while (true)    {   }
+            while (true) {   }
         }
     }
 

@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    public class Lobby 
+    public class Lobby
     {
         List<Room> emptyList = new List<Room>(3);
         List<Room> fullList = new List<Room>(3);
 
-        public void EnterLobby(Socket enterSocket, EndPoint endPoint)
+        public Session EnterLobby(Socket enterSocket, EndPoint endPoint)
         {
+            Room enterRoom = null;
             for (int i = 0; i < fullList.Count; i++)
             {
                 if (fullList[i].Finish)
@@ -25,7 +26,7 @@ namespace ServerCore
 
             if (emptyList.Count > 0)
             {
-                Room enterRoom = emptyList[0];
+                enterRoom = emptyList[0];
 
                 enterRoom.Start(enterSocket);
                 enterRoom.OnConnected(endPoint);
@@ -35,9 +36,10 @@ namespace ServerCore
             }
             else
             {
-                emptyList.Add(new Room());
+                enterRoom = new Room();
+                emptyList.Add(enterRoom);
             }
-
+            return enterRoom;
         }
 
     }
