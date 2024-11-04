@@ -12,7 +12,7 @@ namespace ServerCore
         public abstract void Read(ArraySegment<byte> s);
     }
 
-    public class PlayerInfoReq : Packet
+    public class PlayerInfoReq //: Packet
     {
         public long playerId;
         public string name;
@@ -38,7 +38,7 @@ namespace ServerCore
                 success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.duration);
                 count += sizeof(float);
 
-                return true;
+                return success;
             }
 
             public void Read(ReadOnlySpan<byte> s, ref ushort count)
@@ -54,12 +54,12 @@ namespace ServerCore
             }
         }
 
-        public PlayerInfoReq()
-        {
-            packetId = (ushort)Define.PacketID.PlayerInfoReq;
-        }
+        //public PlayerInfoReq()
+        //{
+        //    packetId = (ushort)Define.PacketID.PlayerInfoReq;
+        //}
 
-        public override void Read(ArraySegment<byte> segment)
+        public void Read(ArraySegment<byte> segment)
         {
             ushort count = 4;
             ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
@@ -85,7 +85,7 @@ namespace ServerCore
             }
         }
 
-        public override ArraySegment<byte> Write()
+        public ArraySegment<byte> Write()
         {
             ArraySegment<byte> segment = SendBufferHelper.Open(4096);
             ushort count = 0;
@@ -95,7 +95,7 @@ namespace ServerCore
             Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
             count += sizeof(ushort);
 
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.packetId);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)Define.PacketID.PlayerInfoReq);
             count += sizeof(ushort);
 
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
