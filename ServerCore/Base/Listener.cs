@@ -46,8 +46,8 @@ namespace ServerCore.Base
             if (args.SocketError == SocketError.Success)
             {
                 Session session = null;
-                session = lobby.EnterLobby(args.AcceptSocket, args.AcceptSocket.RemoteEndPoint);
-                //session = _sessionFactory.Invoke();
+                //session = lobby.EnterLobby(args.AcceptSocket, args.AcceptSocket.RemoteEndPoint);
+                session = _sessionFactory.Invoke();
                 session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
             }

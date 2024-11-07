@@ -8,15 +8,22 @@ using System.Text;
 
 public enum PacketID
 {
-    PlayerInfoReq = 1,
-	Test = 2,
+    C_PlayerInfoReq = 1,
+	C_Test = 2,
 	
 }
-public class PlayerInfoReq
+
+interface IPacket
+{
+	ushort Prptocol { get; }
+	void Read(ArraySegment<byte> segement);
+	ArraySegment<byte> Write();
+}
+
+public class C_PlayerInfoReq : IPacket
 {
     public long playerId;
 	public string name;
-	public byte state;
 	
 	#region Skill
 	public struct Skill
@@ -57,6 +64,7 @@ public class PlayerInfoReq
 	public List<Skill> skills = new List<Skill>();
 	
 
+    public ushort Prptocol { get {return (ushort)PacketID.C_PlayerInfoReq; } }
 
     public void Read(ArraySegment<byte> segment)
     {
@@ -71,9 +79,6 @@ public class PlayerInfoReq
 		
 		this.name = Encoding.Unicode.GetString(s.Slice(count, nameLen));
 		count += nameLen;
-		
-		this.state = (byte)segment.Array[segment.Offset + count];
-		count += sizeof(byte);
 		
 		
 		this.skills.Clear();
@@ -98,7 +103,7 @@ public class PlayerInfoReq
         Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
         count += sizeof(ushort);
 
-        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.PlayerInfoReq);
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_PlayerInfoReq);
         count += sizeof(ushort);
 
         success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
@@ -108,9 +113,6 @@ public class PlayerInfoReq
 		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen);
 		count += sizeof(ushort);
 		count += nameLen;
-		
-		 segment.Array[segment.Offset + count] = (byte)this.state;
-		count += sizeof(byte);
 		
 		
 		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)skills.Count);
@@ -126,7 +128,7 @@ public class PlayerInfoReq
         return success ? SendBufferHelper.Close(count) : null;
     }
 }
-public class Test
+public class C_Test : IPacket
 {
     public long playerId;
 	public string name;
@@ -170,6 +172,7 @@ public class Test
 	public List<Skill> skills = new List<Skill>();
 	
 
+    public ushort Prptocol { get {return (ushort)PacketID.C_Test; } }
 
     public void Read(ArraySegment<byte> segment)
     {
@@ -208,7 +211,7 @@ public class Test
         Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
         count += sizeof(ushort);
 
-        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.Test);
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_Test);
         count += sizeof(ushort);
 
         success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);

@@ -11,6 +11,7 @@ namespace DummyClient
 
         static void Main(string[] args)
         {
+
             string domain = "pkc-5000.shop";
             string local = Dns.GetHostName();
             IPAddress[] addresses = Dns.GetHostAddresses(local);

@@ -3,6 +3,69 @@
     public class PacketFormat
     {
         /// <summary>
+        /// {0} 패킷 등록
+        /// </summary>
+        public static string managerFormat =
+@"using Server;
+using ServerCore;
+
+public class PacketManager
+{{
+    #region Singleton
+    static PacketManager _instance;
+    public static PacketManager Instance
+    {{
+        get {{ return _instance ??= new PacketManager(); }}
+    }}
+    #endregion Singleton
+
+    Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new();
+    Dictionary<ushort, Action<PacketSession, IPacket>> _handler = new();
+
+
+    public void Register()
+    {{
+{0}
+    }}
+
+    public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)
+    {{
+        int count = 0;
+        ushort size = (ushort)BitConverter.ToInt16(buffer.Array, buffer.Offset);
+        count += 2;
+        ushort id = (ushort)BitConverter.ToInt16(buffer.Array, buffer.Offset + count);
+        count += 2;
+
+        Action<PacketSession, ArraySegment<byte>> action = null;
+        if(_onRecv.TryGetValue(id, out action))
+        {{
+            action.Invoke(session, buffer);
+        }}
+
+    }}
+
+    void MakePacket<T>(PacketSession session, ArraySegment<byte> buffer) where T : IPacket, new()
+    {{
+        T pkt = new T();
+        pkt.Read(buffer);
+
+        Action<PacketSession, IPacket> action = null;
+        if (_handler.TryGetValue(pkt.Prptocol, out action))
+        {{
+            action.Invoke(session, pkt);
+        }}
+    }}
+}}
+";
+        /// <summary>
+        /// {0} 패킷 이름
+        /// </summary>
+        public static string managerRegisterFormat =
+@"       _onRecv.Add((ushort)PacketID.{0}, MakePacket<{0}>);
+        _handler.Add((ushort)PacketID.{0}, PacketHandler.{0}Handler);";
+
+
+        /// <summary>
         /// {0}패킷 이름
         /// {1}완성된 파일
         /// </summary>
@@ -19,6 +82,14 @@ public enum PacketID
 {{
     {0}
 }}
+
+interface IPacket
+{{
+	ushort Prptocol {{ get; }}
+	void Read(ArraySegment<byte> segement);
+	ArraySegment<byte> Write();
+}}
+
 {1}
 ";
         /// <summary>
@@ -35,10 +106,11 @@ public enum PacketID
         /// {3}멤버 변수 Write
         /// </summary>
         public static string packetFormat =
-@"public class {0}
+@"public class {0} : IPacket
 {{
     {1}
 
+    public ushort Prptocol {{ get {{return (ushort)PacketID.{0}; }} }}
 
     public void Read(ArraySegment<byte> segment)
     {{

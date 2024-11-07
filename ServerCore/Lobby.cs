@@ -10,12 +10,12 @@ namespace ServerCore
 {
     public class Lobby
     {
-        List<Room> emptyList = new List<Room>(3);
-        List<Room> fullList = new List<Room>(3);
+        List<BattleRoom> emptyList = new List<BattleRoom>(3);
+        List<BattleRoom> fullList = new List<BattleRoom>(3);
 
         public Session EnterLobby(Socket enterSocket, EndPoint endPoint)
         {
-            Room enterRoom = null;
+            BattleRoom enterRoom = null;
             for (int i = 0; i < fullList.Count; i++)
             {
                 if (fullList[i].Finish)
@@ -36,7 +36,7 @@ namespace ServerCore
             }
             else
             {
-                enterRoom = new Room();
+                enterRoom = new BattleRoom();
                 emptyList.Add(enterRoom);
             }
             return enterRoom;
