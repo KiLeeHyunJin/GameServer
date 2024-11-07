@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using ServerCore.Base;
 
 namespace ServerCore
 {
@@ -59,6 +58,15 @@ namespace ServerCore
         public abstract void OnSend(int numOfByte);
         public abstract void OnDisconnected(EndPoint endPoint);
 
+        void Clear()
+        {
+            lock(_lock)
+            {
+                _sendQueue.Clear();
+                _pendingList.Clear();
+            }
+        }
+
         public void Start(Socket socket)
         {
             _socket = socket;
@@ -81,21 +89,17 @@ namespace ServerCore
             }
         }
 
-        public void Disconnect()
-        {
-            if (Interlocked.Exchange(ref _disconnected, 1) == 1)
-                return;
+    
 
-            OnDisconnected(_socket.RemoteEndPoint);
-            _socket.Shutdown(SocketShutdown.Both);
-            _socket.Close();
-        }
-
-
-        #region
+        #region Send
 
         void RegisterSend()
         {
+            if (_disconnected == 1)
+            { 
+                return; 
+            }
+
             while (_sendQueue.Count > 0)
             {
                 ArraySegment<byte> buff = _sendQueue.Dequeue();
@@ -103,24 +107,17 @@ namespace ServerCore
             }
 
             _sendArgs.BufferList = _pendingList;
-
-            bool pending = _socket.SendAsync(_sendArgs);
-            if (pending == false)
+            try
             {
-                OnSendCompleted(null, _sendArgs);
+                bool pending = _socket.SendAsync(_sendArgs);
+                if (pending == false)
+                {
+                    OnSendCompleted(null, _sendArgs);
+                }
             }
-        }
-
-        void RegisterRecv()
-        {
-            _recvBuffer.Clean();
-            ArraySegment<byte> segment = _recvBuffer.WriteSegment;
-            _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
-
-            bool pending = _socket.ReceiveAsync(_recvArgs);
-            if (pending == false)
+            catch(Exception e)
             {
-                OnRecvCompleted(null, _recvArgs);
+                Console.WriteLine($"Register Send Fail{e.Message}");
             }
         }
 
@@ -153,7 +150,31 @@ namespace ServerCore
             }
 
         }
+        #endregion Send
 
+        #region Recv
+        void RegisterRecv()
+        {
+            if(_disconnected == 1)
+            {   return; }
+
+            _recvBuffer.Clean();
+            ArraySegment<byte> segment = _recvBuffer.WriteSegment;
+            _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
+
+            try
+            {
+                bool pending = _socket.ReceiveAsync(_recvArgs);
+                if (pending == false)
+                {
+                    OnRecvCompleted(null, _recvArgs);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Register Send Fail{e.Message}");
+            }
+        }
 
         void OnRecvCompleted(object sender, SocketAsyncEventArgs args)
         {
@@ -180,8 +201,6 @@ namespace ServerCore
                         Disconnect();
                         return;
                     }
-
-
                     RegisterRecv();
                 }
                 catch (Exception e)
@@ -194,7 +213,18 @@ namespace ServerCore
                 Disconnect();
             }
         }
-        #endregion
+        #endregion Recv
+
+        public void Disconnect()
+        {
+            if (Interlocked.Exchange(ref _disconnected, 1) == 1)
+                return;
+
+            OnDisconnected(_socket.RemoteEndPoint);
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Close();
+        }
+
 
     }
 }

@@ -1,15 +1,18 @@
-using Server;
 using ServerCore;
 
 public class PacketManager
 {
     #region Singleton
-    static PacketManager _instance;
+    static PacketManager _instance = new();
     public static PacketManager Instance
     {
-        get { return _instance ??= new PacketManager(); }
+        get { return _instance; }
     }
     #endregion Singleton
+    PacketManager()
+    {
+        Register();
+    }
 
     Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new();
     Dictionary<ushort, Action<PacketSession, IPacket>> _handler = new();
@@ -17,10 +20,16 @@ public class PacketManager
 
     public void Register()
     {
-       _onRecv.Add((ushort)PacketID.C_PlayerInfoReq, MakePacket<C_PlayerInfoReq>);
-        _handler.Add((ushort)PacketID.C_PlayerInfoReq, PacketHandler.C_PlayerInfoReqHandler);
-       _onRecv.Add((ushort)PacketID.C_Test, MakePacket<C_Test>);
-        _handler.Add((ushort)PacketID.C_Test, PacketHandler.C_TestHandler);
+       _onRecv.Add((ushort)PacketID.C_Match, MakePacket<C_Match>);
+        _handler.Add((ushort)PacketID.C_Match, PacketHandler.C_MatchHandler);
+       _onRecv.Add((ushort)PacketID.C_BanPick, MakePacket<C_BanPick>);
+        _handler.Add((ushort)PacketID.C_BanPick, PacketHandler.C_BanPickHandler);
+       _onRecv.Add((ushort)PacketID.C_PickUp, MakePacket<C_PickUp>);
+        _handler.Add((ushort)PacketID.C_PickUp, PacketHandler.C_PickUpHandler);
+       _onRecv.Add((ushort)PacketID.C_Attck, MakePacket<C_Attck>);
+        _handler.Add((ushort)PacketID.C_Attck, PacketHandler.C_AttckHandler);
+       _onRecv.Add((ushort)PacketID.C_Chat, MakePacket<C_Chat>);
+        _handler.Add((ushort)PacketID.C_Chat, PacketHandler.C_ChatHandler);
 
     }
 
@@ -46,7 +55,7 @@ public class PacketManager
         pkt.Read(buffer);
 
         Action<PacketSession, IPacket> action = null;
-        if (_handler.TryGetValue(pkt.Prptocol, out action))
+        if (_handler.TryGetValue(pkt.Protocol, out action))
         {
             action.Invoke(session, pkt);
         }

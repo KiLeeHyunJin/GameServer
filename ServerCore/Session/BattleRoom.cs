@@ -7,10 +7,12 @@ namespace ServerCore
     public class BattleRoom : PacketSession
     {
         public bool Finish { get; private set; }
-        Socket[] sockets;
+        Socket[] sockets = new Socket[2];
+        int membersCount = 0;
         public override void OnConnected(EndPoint endPoint)
         {
-
+            //sockets[membersCount] = endPoint;
+            membersCount += 1;
             Console.WriteLine($"OnConnected Client : {endPoint}");
             //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Sever!");
 
@@ -24,9 +26,9 @@ namespace ServerCore
             //Disconnect();
         }
 
-        public void OnPlay()
+        public bool OnPlay()
         {
-
+            return membersCount == 2;
         }
 
         public override void OnDisconnected(EndPoint endPoint)

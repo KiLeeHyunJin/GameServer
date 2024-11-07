@@ -11,33 +11,17 @@ namespace DummyClient
         {
             Console.WriteLine($"OnConnected Server : {endPoint}");
 
-            C_PlayerInfoReq packet = new C_PlayerInfoReq() { playerId = 1001, name = "테스트" };
-            
-            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 101, duration = 3.0f, level = 1 });
-            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 102, duration = 6.0f, level = 3 });
-            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 103, duration = 9.0f, level = 5 });
-            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 104, duration = 12.0f, level = 7 });
+        }
 
-            #region
-            //byte[] size = BitConverter.GetBytes(packet.size);
-            //byte[] packetId = BitConverter.GetBytes(packet.packetId);
-            //byte[] playerId = BitConverter.GetBytes(packet.playerId);
 
-            //Array.Copy(size     , 0, s.Array, s.Offset + count, size.Length);
-            //count += 2;
+        public override void OnRecvPacket(ArraySegment<byte> buffer)
+        {
+            PacketManager.Instance.OnRecvPacket(this, buffer);
+        }
 
-            //Array.Copy(packetId , 0, s.Array, s.Offset + count, packetId.Length);
-            //count += 2;
+        public override void OnSend(int numOfByte)
+        {
 
-            //Array.Copy(playerId , 0, s.Array, s.Offset + count, playerId.Length);
-            //count += 8;
-            #endregion
-
-            ArraySegment<byte> s = packet.Write();
-            if (s != null)
-            {
-                Send(s);
-            }
         }
 
         public override void OnDisconnected(EndPoint endPoint)
@@ -45,17 +29,5 @@ namespace DummyClient
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
-        public override void OnRecvPacket(ArraySegment<byte> buffer)
-        {
-            ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
-            ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + 2);
-            Console.WriteLine($"RecvPacketId : {id} size {size}");
-
-        }
-
-        public override void OnSend(int numOfByte)
-        {
-
-        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using ServerCore.Base;
+﻿using ServerCore;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -14,7 +14,7 @@ namespace DummyClient
 
             string domain = "pkc-5000.shop";
             string local = Dns.GetHostName();
-            IPAddress[] addresses = Dns.GetHostAddresses(local);
+            IPAddress[] addresses = Dns.GetHostAddresses(domain);
 
             Thread.Sleep(1000);
 
@@ -28,7 +28,10 @@ namespace DummyClient
                         Console.WriteLine($"[RemoteAddress] : {remoteEndPoint} ");
 
                         Connector connector = new Connector();
-                        connector.Connect(remoteEndPoint, () => { return new ServerSession(); });
+                        connector.Connect(
+                            remoteEndPoint, 
+                            () => { return SessionManager.Instance.Generate(); }, 
+                            1000);
                     }
                 }
             }
@@ -38,7 +41,20 @@ namespace DummyClient
             }
 
 
-            while (true) {   }
+            while (true) 
+            {   
+                try
+                {
+                    SessionManager.Instance.SendForEach();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
+                Thread.Sleep(250);
+
+            }
         }
     }
 

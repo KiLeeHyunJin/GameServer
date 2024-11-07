@@ -6,18 +6,21 @@
         /// {0} 패킷 등록
         /// </summary>
         public static string managerFormat =
-@"using Server;
-using ServerCore;
+@"using ServerCore;
 
 public class PacketManager
 {{
     #region Singleton
-    static PacketManager _instance;
+    static PacketManager _instance = new();
     public static PacketManager Instance
     {{
-        get {{ return _instance ??= new PacketManager(); }}
+        get {{ return _instance; }}
     }}
     #endregion Singleton
+    PacketManager()
+    {{
+        Register();
+    }}
 
     Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new();
     Dictionary<ushort, Action<PacketSession, IPacket>> _handler = new();
@@ -50,7 +53,7 @@ public class PacketManager
         pkt.Read(buffer);
 
         Action<PacketSession, IPacket> action = null;
-        if (_handler.TryGetValue(pkt.Prptocol, out action))
+        if (_handler.TryGetValue(pkt.Protocol, out action))
         {{
             action.Invoke(session, pkt);
         }}
@@ -72,7 +75,6 @@ public class PacketManager
         public static string fileFormat =
 @"
 using ServerCore;
-using ServerCore.Base;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -85,7 +87,7 @@ public enum PacketID
 
 interface IPacket
 {{
-	ushort Prptocol {{ get; }}
+	ushort Protocol {{ get; }}
 	void Read(ArraySegment<byte> segement);
 	ArraySegment<byte> Write();
 }}
@@ -110,7 +112,7 @@ interface IPacket
 {{
     {1}
 
-    public ushort Prptocol {{ get {{return (ushort)PacketID.{0}; }} }}
+    public ushort Protocol {{ get {{return (ushort)PacketID.{0}; }} }}
 
     public void Read(ArraySegment<byte> segment)
     {{

@@ -2,31 +2,35 @@ using System.Net;
 using System.Net.Sockets;
 
 
-namespace ServerCore.Base
+namespace ServerCore
 {
     public class Connector
     {
         Func<Session> _sessionFactory;
         Lobby lobby = new Lobby();
 
-        public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory)
+        public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory, int count = 1)
         {
             _sessionFactory = sessionFactory;
 
-            Socket socket = new Socket(
+            for (int i = 0; i < count; i++)
+            {
+                Socket socket = new Socket(
                 Define.AddressType,
                 Define.SocketType,
                 Define.ProtocolType);
 
-            socket.ReceiveTimeout = 30000;
-            //socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                socket.ReceiveTimeout = 30000;
+                //socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
 
-            args.UserToken = socket;
-            args.RemoteEndPoint = endPoint;
-            args.Completed += OnConnectedCompleted;
+                args.UserToken = socket;
+                args.RemoteEndPoint = endPoint;
+                args.Completed += OnConnectedCompleted;
 
-            RegistConnect(args);
+                RegistConnect(args);
+            }
+          
         }
 
         void RegistConnect(SocketAsyncEventArgs args)

@@ -3,12 +3,16 @@ using ServerCore;
 public class PacketManager
 {
     #region Singleton
-    static PacketManager _instance;
+    static PacketManager _instance = new();
     public static PacketManager Instance
     {
-        get { return _instance ??= new PacketManager(); }
+        get { return _instance; }
     }
     #endregion Singleton
+    PacketManager()
+    {
+        Register();
+    }
 
     Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new();
     Dictionary<ushort, Action<PacketSession, IPacket>> _handler = new();
@@ -16,6 +20,16 @@ public class PacketManager
 
     public void Register()
     {
+       _onRecv.Add((ushort)PacketID.S_BanPick, MakePacket<S_BanPick>);
+        _handler.Add((ushort)PacketID.S_BanPick, PacketHandler.S_BanPickHandler);
+       _onRecv.Add((ushort)PacketID.S_PickUp, MakePacket<S_PickUp>);
+        _handler.Add((ushort)PacketID.S_PickUp, PacketHandler.S_PickUpHandler);
+       _onRecv.Add((ushort)PacketID.S_Attck, MakePacket<S_Attck>);
+        _handler.Add((ushort)PacketID.S_Attck, PacketHandler.S_AttckHandler);
+       _onRecv.Add((ushort)PacketID.S_Chat, MakePacket<S_Chat>);
+        _handler.Add((ushort)PacketID.S_Chat, PacketHandler.S_ChatHandler);
+       _onRecv.Add((ushort)PacketID.S_Result, MakePacket<S_Result>);
+        _handler.Add((ushort)PacketID.S_Result, PacketHandler.S_ResultHandler);
 
     }
 
@@ -41,7 +55,7 @@ public class PacketManager
         pkt.Read(buffer);
 
         Action<PacketSession, IPacket> action = null;
-        if (_handler.TryGetValue(pkt.Prptocol, out action))
+        if (_handler.TryGetValue(pkt.Protocol, out action))
         {
             action.Invoke(session, pkt);
         }

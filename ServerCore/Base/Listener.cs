@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace ServerCore.Base
+namespace ServerCore
 {
     public class Listener
     {
@@ -14,7 +14,7 @@ namespace ServerCore.Base
                 Define.AddressType,
                 Define.SocketType,
                 Define.ProtocolType);
-            //_listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
+            _listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
 
             _listenSocket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
             _listenSocket.Listen(10);

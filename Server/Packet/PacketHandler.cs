@@ -1,29 +1,42 @@
-﻿using ServerCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Server;
+using ServerCore;
 
 internal class PacketHandler
 {
-    public static void S_PlayerInfoReqHandler(PacketSession session, IPacket packet)
+    public static void C_ChatHandler(PacketSession session, IPacket packet)
     {
-        C_PlayerInfoReq p = packet as C_PlayerInfoReq;
-        Console.WriteLine($"PlayerInfoReq Player ID : {p.playerId} name : {p.name}");
-        foreach (var skill in p.skills)
-        {
-            Console.WriteLine($"Skill(Id:{skill.id} / level:{skill.level} / duration:{skill.duration})");
-        }
+        C_Chat p = packet as C_Chat;
+        ClientSession clientSession = session as ClientSession;
+        if (clientSession.Room == null)
+        {   return; }
+
+        GameRoom room = clientSession.Room;
+        room.Push(
+            () => { room.Broadcast(clientSession, p.chat); }
+            );
     }
 
-    public static void S_TestHandler(PacketSession session, IPacket packet)
+
+    public static void C_MatchHandler(PacketSession session, IPacket packet)
     {
-        C_PlayerInfoReq p = packet as C_PlayerInfoReq;
-        Console.WriteLine($"PlayerInfoReq Player ID : {p.playerId} name : {p.name}");
-        foreach (var skill in p.skills)
-        {
-            Console.WriteLine($"Skill(Id:{skill.id} / level:{skill.level} / duration:{skill.duration})");
-        }
+        C_Match p = packet as C_Match;
     }
+
+    public static void C_BanPickHandler(PacketSession session, IPacket packet)
+    {
+        C_BanPick p = packet as C_BanPick;
+    }
+
+    public static void C_PickUpHandler(PacketSession session, IPacket packet)
+    {
+        C_PickUp p = packet as C_PickUp;
+    }
+
+    public static void C_AttckHandler(PacketSession session, IPacket packet)
+    {
+        C_Attck p = packet as C_Attck;
+    }
+
+
+
 }
