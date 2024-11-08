@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Microsoft.Win32;
+using System.Net;
 using System.Net.Sockets;
 
 namespace ServerCore
@@ -8,7 +9,7 @@ namespace ServerCore
         Socket _listenSocket;
         Func<Session> _sessionFactory;
         Lobby lobby;
-        public void Init(Func<Session> sessionFactory)
+        public void Init(Func<Session> sessionFactory, int register = 10, int backlog = 100)
         {
             _sessionFactory -= sessionFactory;
             _sessionFactory += sessionFactory;
@@ -20,15 +21,17 @@ namespace ServerCore
             _listenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
 
             _listenSocket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
-            _listenSocket.Listen(10);
-
-            Console.WriteLine($"Open Socket {IPAddress.Any}:{Define.PortNum}");
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
+            _listenSocket.Listen(backlog);
 
             lobby = new();
 
-            RegisterAccept(args);
+            for (int i = 0; i < register; i++)
+            {
+                Console.WriteLine($"Open Socket {IPAddress.Any}:{Define.PortNum}");
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
+                RegisterAccept(args);
+            }
         }
 
         void RegisterAccept(SocketAsyncEventArgs args)
