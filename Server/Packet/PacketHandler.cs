@@ -12,9 +12,8 @@ internal class PacketHandler
         {   return; }
 
         GameRoom room = clientSession.Room;
-        room.Push(
-            () => { room.Broadcast(p.Write()); }
-            );
+        //Console.WriteLine("Chat Handler");
+        room.Push(() => room.Broadcast(p.Write()));
     }
 
     public static void C_LeaveGameHandler(PacketSession session, IPacket packet)
@@ -25,6 +24,8 @@ internal class PacketHandler
             return;
         }
         GameRoom room = clientSession.Room;
+        //Console.WriteLine("C_LeaveGameHandler");
+
         room.Push(() => room.Leave(clientSession));
     }
 
@@ -38,7 +39,20 @@ internal class PacketHandler
         }
         Console.WriteLine($"{p.posX},{p.posZ}");
         GameRoom room = clientSession.Room;
-        room.Push(() => room.Move(clientSession, p));
+        if(room == null)
+        {
+            
+            Console.WriteLine($"Room is Invalid {clientSession.SessionId}");
+        }
+        else if(p == null)
+        {
+            Console.WriteLine($"Packet is Invalid");
+        }
+        else
+        {
+            //Console.WriteLine("MoveHandler");
+            room.Push(() => room.Move(clientSession, p));
+        }
     }
 
 

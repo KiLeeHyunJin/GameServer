@@ -10,6 +10,9 @@ namespace ServerCore
         Lobby lobby;
         public void Init(Func<Session> sessionFactory)
         {
+            _sessionFactory -= sessionFactory;
+            _sessionFactory += sessionFactory;
+
             _listenSocket = new Socket(
                 Define.AddressType,
                 Define.SocketType,
@@ -22,7 +25,6 @@ namespace ServerCore
             Console.WriteLine($"Open Socket {IPAddress.Any}:{Define.PortNum}");
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAccpetCompleted);
-            _sessionFactory += sessionFactory;
 
             lobby = new();
 
@@ -42,17 +44,16 @@ namespace ServerCore
 
         void OnAccpetCompleted(object? sender, SocketAsyncEventArgs args)
         {
-
             if (args.SocketError == SocketError.Success)
             {
                 //session = lobby.EnterLobby(args.AcceptSocket, args.AcceptSocket.RemoteEndPoint);
                 Socket socket = args.AcceptSocket;
                 if(socket != null)
                 {
-                    Session session = null;
-                    session = _sessionFactory.Invoke();
+                    Session session = _sessionFactory.Invoke();
                     try
                     {
+                        Console.WriteLine($"Create Session");
                         session.Start(socket);
                         session.OnConnected(socket.RemoteEndPoint);
                     }

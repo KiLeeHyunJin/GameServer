@@ -9,7 +9,6 @@ namespace ServerCore
     public interface IJob
     {
         void Push(Action job);
-
     }
    
     public class Job : IJob
@@ -20,6 +19,7 @@ namespace ServerCore
 
         public void Push(Action job)
         {
+            //Console.WriteLine(job.ToString());
             bool flush = false;
             lock (_lock)
             { 
@@ -38,18 +38,21 @@ namespace ServerCore
 
         void Flush()
         {
-            while(true)
+            while (true)
             {
-                Action action = Pop();
+                Action? action = Pop();
                 if(action == null)
                 {
-                    return;
+                    break;
                 }
-                action.Invoke();
+                else
+                {
+                    action.Invoke();
+                }
             }
         }
 
-        Action Pop()
+        Action? Pop()
         {
             lock(_lock)
             {

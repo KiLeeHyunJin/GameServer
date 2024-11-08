@@ -11,11 +11,10 @@ namespace DummyClient
 
         static void Main(string[] args)
         {
-
             string domain = "pkc-5000.shop";
             string local = Dns.GetHostName();
-            IPAddress[] addresses = Dns.GetHostAddresses(local);
-
+            IPAddress[] addresses = Dns.GetHostAddresses(domain);
+            Define.Connect connect = Define.Connect.Domain;
             Thread.Sleep(1000);
 
             try
@@ -30,7 +29,8 @@ namespace DummyClient
                         Connector connector = new Connector();
                         connector.Connect(
                             remoteEndPoint, 
-                            () => { return SessionManager.Instance.Generate(); }, 
+                            () => { return SessionManager.Instance.Generate(); },
+                            connect,
                             1);
                     }
                 }
@@ -52,7 +52,7 @@ namespace DummyClient
                     Console.WriteLine(e.Message);
                 }
 
-                Thread.Sleep(250);
+                Thread.Sleep(1500);
             }
         }
     }

@@ -21,10 +21,11 @@ namespace Server
             lock(_lock)
             {
                 int sessionId = ++_sessionId;
-                ClientSession session = new();
-                session.SessionId = sessionId;
+                ClientSession session = new()
+                {
+                    SessionId = sessionId
+                };
                 _sessions.Add(sessionId, session);
-                Console.WriteLine($"Connected : {sessionId}");
                 return session;
             }
         }

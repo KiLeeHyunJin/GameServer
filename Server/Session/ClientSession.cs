@@ -8,21 +8,24 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-
     class ClientSession : PacketSession
     {
-        public GameRoom Room { get; set; }
-        public int SessionId { get; set; }
+        public GameRoom SetRoom { set { _room = value; } }
+        public GameRoom Room { get { return _room; } }
+        GameRoom _room;
 
+        public int SessionId { get; set; }
         public float PosX { get; set; }
         public float PosY { get; set; }
         public float PosZ { get; set; }
 
-
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected Client : {endPoint}");
-            Program.Room.Push(() => { Program.Room.Enter(this); });
+            Program.Room.Push(() => 
+            { 
+                Program.Room.Enter(this);
+            });
         }
 
 
@@ -42,12 +45,12 @@ namespace Server
             SessionManager.Instance.Remove(this);
             if (Room != null)
             {
+                Console.WriteLine($"OnDisconnected : {endPoint}");
                 Program.Room.Push(() => 
                 {
                     GameRoom room = Room;
                     room.Leave(this);
-                    Room = null;
-                    Console.WriteLine($"OnDisconnected : {endPoint}");
+                    SetRoom = null;
                 });
             }
         }

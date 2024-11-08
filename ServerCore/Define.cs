@@ -20,7 +20,11 @@ namespace ServerCore
             PlayerInfoReq = 1,
             PlayerInfoOk = 2,
         }
-
+        public enum Connect
+        {
+            Local,
+            Domain,
+        }
 
     }
 }

@@ -10,7 +10,7 @@ namespace ServerCore
         Func<Session> _sessionFactory;
         //Lobby lobby = new Lobby();
 
-        public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory, int count = 1)
+        public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory, Define.Connect connect, int count = 1)
         {
             _sessionFactory = sessionFactory;
 
@@ -20,9 +20,13 @@ namespace ServerCore
                 Define.AddressType,
                 Define.SocketType,
                 Define.ProtocolType);
+                //socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); // 재사용 설정 추가
 
                 socket.ReceiveTimeout = 30000;
-                //socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
+                if(connect == Define.Connect.Domain)
+                {
+                    socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
+                }
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
 
                 args.UserToken = socket;

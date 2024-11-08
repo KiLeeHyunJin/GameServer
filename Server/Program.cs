@@ -5,12 +5,12 @@ namespace Server
     internal class Program
     {
         static Listener _listener = new();
-        public static GameRoom Room = new GameRoom();
+        readonly public static GameRoom Room = new();
 
         static void FlushRoom()
         {
             Room.Push(() => Room.Flush());
-            JobTimer.Instance.Push(FlushRoom, 250);
+            JobTimer.Instance.Push(FlushRoom, 1000);
         }
 
         static void Main(string[] args)
