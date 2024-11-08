@@ -1,5 +1,8 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace ServerCore
 {
@@ -9,6 +12,7 @@ namespace ServerCore
         public sealed override int OnRecv(ArraySegment<byte> buffer)
         {
             int processLen = 0;
+            //int packetCount = 0; 
 
             while (true)
             {
@@ -22,6 +26,7 @@ namespace ServerCore
                     break;
                 }
                 //Console.WriteLine($"bufferCount : {buffer.Count}, dataSize {dataSize}");
+                //packetCount++;
 
                 OnRecvPacket(new ArraySegment<byte>(
                     buffer.Array,
@@ -33,7 +38,13 @@ namespace ServerCore
                     buffer.Array,
                     buffer.Offset + dataSize,
                     buffer.Count - dataSize);
+
             }
+
+            //if(packetCount > 1)
+            //{
+            //    Console.WriteLine($"패킷 모아보내기 : {packetCount}");
+            //}
 
             return processLen;
         }
@@ -42,14 +53,15 @@ namespace ServerCore
 
     public abstract class Session
     {
-        Socket _socket;
         int _disconnected = 0;
-
         object _lock = new object();
+
+        Socket _socket;
+        RecvBuffer _recvBuffer = new RecvBuffer(65535);
+
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
         Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
 
-        RecvBuffer _recvBuffer = new RecvBuffer(1024);
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
 
@@ -77,6 +89,26 @@ namespace ServerCore
             RegisterRecv();
         }
 
+        public void Send(List<ArraySegment<byte>> sendBuffList)
+        {
+            if(sendBuffList.Count == 0)
+            {
+                return;
+            }
+
+            lock (_lock)
+            {
+                for (int i = 0; i < sendBuffList.Count; i++)
+                {
+                    _sendQueue.Enqueue(sendBuffList[i]);
+                }
+                if (_pendingList.Count == 0)
+                {
+                    RegisterSend();
+                }
+            }
+        }
+
         public void Send(ArraySegment<byte> sendBuff)
         {
             lock (_lock)
@@ -89,7 +121,7 @@ namespace ServerCore
             }
         }
 
-    
+
 
         #region Send
 

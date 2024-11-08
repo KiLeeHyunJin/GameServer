@@ -45,15 +45,26 @@ namespace ServerCore
 
             if (args.SocketError == SocketError.Success)
             {
-                Session session = null;
                 //session = lobby.EnterLobby(args.AcceptSocket, args.AcceptSocket.RemoteEndPoint);
-                session = _sessionFactory.Invoke();
-                session.Start(args.AcceptSocket);
-                session.OnConnected(args.AcceptSocket.RemoteEndPoint);
+                Socket socket = args.AcceptSocket;
+                if(socket != null)
+                {
+                    Session session = null;
+                    session = _sessionFactory.Invoke();
+                    try
+                    {
+                        session.Start(socket);
+                        session.OnConnected(socket.RemoteEndPoint);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Accept Socket Invaild : {e.Message}");
+                    }
+                }
             }
             else
             {
-                Console.WriteLine(args.SocketError.ToString());
+                Console.WriteLine($"Accept Invaild : {args.SocketError.ToString()}");
             }
             RegisterAccept(args);
         }

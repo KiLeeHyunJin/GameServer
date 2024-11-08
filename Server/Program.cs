@@ -4,11 +4,17 @@ namespace Server
 {
     internal class Program
     {
+        static Listener _listener = new();
         public static GameRoom Room = new GameRoom();
+
+        static void FlushRoom()
+        {
+            Room.Push(() => Room.Flush());
+            JobTimer.Instance.Push(FlushRoom, 250);
+        }
 
         static void Main(string[] args)
         {
-            Listener _listener = new Listener();
             try
             {
                 _listener.Init(() => { return SessionManager.Instance.Generate(); });
@@ -20,9 +26,11 @@ namespace Server
 
             Console.WriteLine("Listening...");
 
+            JobTimer.Instance.Push(FlushRoom);
+
             while (true)
             {
-                ;
+                JobTimer.Instance.Flush();
             }
         }
     }

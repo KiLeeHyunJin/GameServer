@@ -1,10 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
 <PDL>
-	
-	<packet name ="C_Match">
-		<short name ="playerId"/>
-		<short name ="targetId"/>
-	</packet>
 
 	<packet name ="C_BanPick">
 		<short name ="banId"/>
@@ -24,6 +19,47 @@
 		<string name ="chat"/>
 	</packet>
 
+	<packet name ="C_LeaveGame">
+		<short name ="playerId"/>
+	</packet>
+
+
+
+	<packet name ="C_Move">
+		<float name="posX"/>
+		<float name="posY"/>
+		<float name="posZ"/>
+	</packet>
+	
+	<packet name ="S_BroadcastEnterGame">
+		<short name ="playerId"/>
+		<float name="posX"/>
+		<float name="posY"/>
+		<float name="posZ"/>
+	</packet>
+	
+	<packet name ="S_BroadcastLeaveGame">
+		<short name ="playerId"/>
+	</packet>
+
+	<packet name ="S_BroadcastMove">
+		<short name ="playerId"/>
+		<float name="posX"/>
+		<float name="posY"/>
+		<float name="posZ"/>
+	</packet>
+
+	<packet name ="S_PlayerList">
+		<list name ="player">
+			<bool name ="isSelf"/>
+			<short name ="playerId"/>
+			<float name="posX"/>
+			<float name="posY"/>
+			<float name="posZ"/>
+		</list>
+	</packet>
+
+	
 
 	<packet name ="S_BanPick">
 		<short name ="playerId"/>

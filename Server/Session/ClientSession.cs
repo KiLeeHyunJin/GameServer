@@ -14,6 +14,10 @@ namespace Server
         public GameRoom Room { get; set; }
         public int SessionId { get; set; }
 
+        public float PosX { get; set; }
+        public float PosY { get; set; }
+        public float PosZ { get; set; }
+
 
         public override void OnConnected(EndPoint endPoint)
         {
@@ -43,9 +47,9 @@ namespace Server
                     GameRoom room = Room;
                     room.Leave(this);
                     Room = null;
+                    Console.WriteLine($"OnDisconnected : {endPoint}");
                 });
             }
-            Console.WriteLine($"OnDisconnected : {endPoint}");
         }
     }
 }

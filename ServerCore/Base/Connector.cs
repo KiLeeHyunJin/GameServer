@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Sockets;
 
@@ -7,7 +8,7 @@ namespace ServerCore
     public class Connector
     {
         Func<Session> _sessionFactory;
-        Lobby lobby = new Lobby();
+        //Lobby lobby = new Lobby();
 
         public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory, int count = 1)
         {

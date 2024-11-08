@@ -14,7 +14,7 @@ namespace ServerCore
         readonly public static ProtocolType     ProtocolType        = ProtocolType.Tcp;
 
         readonly public static int              PortNum             = 55555;
-        readonly public static int              SendBufferChunkSize = 4096 * 100;
+        readonly public static int              SendBufferChunkSize = 65535 * 100;
         public enum PacketID
         {
             PlayerInfoReq = 1,

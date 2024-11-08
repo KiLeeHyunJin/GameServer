@@ -1,5 +1,6 @@
 ﻿using Server;
 using ServerCore;
+using System.Text.RegularExpressions;
 
 internal class PacketHandler
 {
@@ -12,15 +13,34 @@ internal class PacketHandler
 
         GameRoom room = clientSession.Room;
         room.Push(
-            () => { room.Broadcast(clientSession, p.chat); }
+            () => { room.Broadcast(p.Write()); }
             );
     }
 
-
-    public static void C_MatchHandler(PacketSession session, IPacket packet)
+    public static void C_LeaveGameHandler(PacketSession session, IPacket packet)
     {
-        C_Match p = packet as C_Match;
+        ClientSession clientSession = session as ClientSession;
+        if(clientSession == null)
+        {
+            return;
+        }
+        GameRoom room = clientSession.Room;
+        room.Push(() => room.Leave(clientSession));
     }
+
+    public static void C_MoveHandler(PacketSession session, IPacket packet)
+    {
+        C_Move p = packet as C_Move;
+        ClientSession clientSession = session as ClientSession;
+        if (clientSession == null)
+        {
+            return;
+        }
+        Console.WriteLine($"{p.posX},{p.posZ}");
+        GameRoom room = clientSession.Room;
+        room.Push(() => room.Move(clientSession, p));
+    }
+
 
     public static void C_BanPickHandler(PacketSession session, IPacket packet)
     {

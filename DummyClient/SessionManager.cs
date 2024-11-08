@@ -12,6 +12,7 @@ namespace DummyClient
         static SessionManager _session = new();
         List<ServerSession> _sessions = new();
         object _lock = new();
+        Random _rand = new();
 
         public void SendForEach()
         {
@@ -19,8 +20,12 @@ namespace DummyClient
             {
                 foreach (var session in _sessions)
                 {
-                    C_Chat p = new();
-                    p.chat = $"Hellow Server!";
+                    C_Move p = new();
+                    p.posX = _rand.Next(-50,50);
+                    p.posY = 0;
+                    p.posZ = _rand.Next(-50, 50);
+                    //C_Chat p = new();
+                    //p.chat = $"Hellow Server!";
                     ArraySegment<byte> segment = p.Write();
                     session.Send(segment);
                 }
