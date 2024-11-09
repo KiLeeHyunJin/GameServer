@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using ServerCore;
 
@@ -6,41 +7,42 @@ namespace Server
 {
     public class Lobby
     {
-        List<GameRoom> emptyList = new List<GameRoom>(3);
-        List<GameRoom> fullList = new List<GameRoom>(3);
+        List<GameRoom> readyList = new List<GameRoom>(3);
+        List<GameRoom> battleList = new List<GameRoom>(3);
 
         public void Flush()
         {
-            for (int i = 0; i < emptyList.Count; i++)
+            for (int i = 0; i < readyList.Count; i++)
             {
-                emptyList[i].Push(() => { emptyList[i].Flush(); });
+                readyList[i].Push(() => { readyList[i].Flush(); });
             }
-            for (int i = 0; i < fullList.Count; i++)
+            for (int i = 0; i < battleList.Count; i++)
             {
-                fullList[i].Push(() => { fullList[i].Flush(); });
+                battleList[i].Push(() => { battleList[i].Flush(); });
             }
         }
 
-        public void RemoveRoom(GameRoom room)
+        public void RemoveRoom(GameRoom room, bool readyRoom)
         {
-            fullList.Remove(room);
+            List<GameRoom> roomList = readyRoom ? readyList : battleList;
+            roomList.Remove(room);
         }
 
         public void EnterLobby(ClientSession session)
         {
             GameRoom enterRoom;
 
-            if (emptyList.Count > 0)
+            if (readyList.Count > 0)
             {
-                enterRoom = emptyList[0];
-                emptyList.RemoveAt(0);
-                fullList.Add(enterRoom);
+                enterRoom = readyList[0];
+                readyList.RemoveAt(0);
+                battleList.Add(enterRoom);
             }
             else
             {
                 enterRoom = new GameRoom();
                 enterRoom.Lobby = this;
-                emptyList.Add(enterRoom);
+                readyList.Add(enterRoom);
             }
             enterRoom.Enter(session);
         }

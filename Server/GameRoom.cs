@@ -13,7 +13,7 @@ namespace Server
         List<ArraySegment<byte>> _pendingList = new();
 
         Job _queue = new();
-        bool Ready = true;
+        bool _ready = true;
         public int RoomIndex { get; set; }
         public int PlayerCount { get { return _sessions.Count; } }
         public Lobby Lobby { get; set; }
@@ -30,7 +30,7 @@ namespace Server
                     }
                 });
             }
-            Lobby.RemoveRoom(this);
+            Lobby.RemoveRoom(this, _ready);
         }
 
         public void Push(Action job)
@@ -57,7 +57,10 @@ namespace Server
         {
             session.SetRoom = this;
             _sessions.Add(session);
-
+            if(_sessions.Count > 1)
+            {
+                _ready = false;
+            }
 
             S_PlayerList players = new();
             foreach (var s in _sessions)
@@ -87,6 +90,10 @@ namespace Server
         public void Leave(ClientSession session)
         {
             _sessions.Remove(session);
+            if(_ready == false)
+            {
+                RemoveRoom();
+            }
 
             S_BroadcastLeaveGame leaveGame = new()
             {
@@ -100,6 +107,14 @@ namespace Server
             //    result.result = true;
             //    _sessions[0].Send(result.Write());
             //}
+        }
+
+        public void Chat(ClientSession session, C_Chat packet)
+        {
+            S_Chat c = new();
+            c.playerId = session.SessionId;
+            c.chat = packet.chat;
+            Broadcast(c.Write());
         }
 
         public void Move(ClientSession session, C_Move packet)

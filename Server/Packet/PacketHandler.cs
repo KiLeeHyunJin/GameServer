@@ -13,7 +13,7 @@ internal class PacketHandler
 
         GameRoom room = clientSession.Room;
         //Console.WriteLine("Chat Handler");
-        room.Push(() => room.Broadcast(p.Write()));
+        room.Push(() => room.Chat(clientSession, p));
     }
 
     public static void C_LeaveGameHandler(PacketSession session, IPacket packet)
