@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    class ClientSession : PacketSession
+    public class ClientSession : PacketSession
     {
         public GameRoom SetRoom { set { _room = value; } }
         public GameRoom Room { get { return _room; } }
         GameRoom _room;
-
         public int SessionId { get; set; }
         public float PosX { get; set; }
         public float PosY { get; set; }
@@ -22,10 +21,7 @@ namespace Server
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected Client : {endPoint}");
-            Program.Room.Push(() => 
-            { 
-                Program.Room.Enter(this);
-            });
+            Program.Lobby.EnterLobby(this);
         }
 
 

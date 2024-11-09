@@ -6,10 +6,11 @@ namespace Server
     {
         static Listener _listener = new();
         readonly public static GameRoom Room = new();
-
+        readonly public static Lobby Lobby = new();
         static void FlushRoom()
         {
-            Room.Push(() => Room.Flush());
+            Lobby.Flush();
+            //Room.Push(() => Room.Flush());
             JobTimer.Instance.Push(FlushRoom, 1000);
         }
 

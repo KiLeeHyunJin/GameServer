@@ -37,7 +37,6 @@ internal class PacketHandler
         {
             return;
         }
-        //Console.WriteLine($"{p.posX},{p.posZ}");
         GameRoom room = clientSession.Room;
         if(room == null)
         {
@@ -49,7 +48,7 @@ internal class PacketHandler
         }
         else
         {
-            //Console.WriteLine("MoveHandler");
+            //Console.WriteLine($"{p.posX},{p.posZ}")
             room.Push(() => room.Move(clientSession, p));
         }
     }

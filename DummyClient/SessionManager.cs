@@ -24,10 +24,12 @@ namespace DummyClient
                     p.posX = _rand.Next(-50,50);
                     p.posY = 0;
                     p.posZ = _rand.Next(-50, 50);
-                    //C_Chat p = new();
-                    //p.chat = $"Hellow Server!";
+                    C_Chat c = new();
+                    c.chat = $"Hellow Server!";
                     ArraySegment<byte> segment = p.Write();
                     session.Send(segment);
+                    ArraySegment<byte> sc = c.Write();
+                    session.Send(sc);
                 }
             }
         }

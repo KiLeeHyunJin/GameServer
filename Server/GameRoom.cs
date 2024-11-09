@@ -7,14 +7,31 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    internal class GameRoom : IJob
+    public class GameRoom : IJob
     {
         List<ClientSession> _sessions = new(2);
         List<ArraySegment<byte>> _pendingList = new();
 
         Job _queue = new();
+        bool Ready = true;
+        public int RoomIndex { get; set; }
+        public int PlayerCount { get { return _sessions.Count; } }
+        public Lobby Lobby { get; set; }
 
-        bool isFinish = false;
+        public void RemoveRoom()
+        {
+            foreach (var item in _sessions)
+            {
+                _queue.Push(() =>
+                {
+                    foreach (var s in _sessions)
+                    {
+                        s.Disconnect();
+                    }
+                });
+            }
+            Lobby.RemoveRoom(this);
+        }
 
         public void Push(Action job)
         {
@@ -25,36 +42,28 @@ namespace Server
         {
             _pendingList.Add(segment);
         }
-        int count = 0;
+
         public void Flush()
         {
-            Console.WriteLine($"Flush Call Count {this.count++}");
             int count = _sessions.Count;
-            if(count == 0)
-            {
-                return;
-            }
-
             for (int i = 0; i < count; i++)
             {
                 _sessions[i].Send(_pendingList);
             }
             _pendingList.Clear();
-            //Console.WriteLine($"Job Flush {count} Item");
         }
 
         public void Enter(ClientSession session)
         {
-            //Console.WriteLine($"GameRoom Enter : {session.SessionId}");
-
             session.SetRoom = this;
             _sessions.Add(session);
+
 
             S_PlayerList players = new();
             foreach (var s in _sessions)
             {
                 players.players.Add(new S_PlayerList.Player()
-                { 
+                {
                     isSelf = (s == session),
                     playerId = (short)s.SessionId,
                     posX = s.PosX,

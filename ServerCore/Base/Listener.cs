@@ -8,7 +8,6 @@ namespace ServerCore
     {
         Socket _listenSocket;
         Func<Session> _sessionFactory;
-        Lobby lobby;
         public void Init(Func<Session> sessionFactory, int register = 10, int backlog = 100)
         {
             _sessionFactory -= sessionFactory;
@@ -23,7 +22,6 @@ namespace ServerCore
             _listenSocket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
             _listenSocket.Listen(backlog);
 
-            lobby = new();
 
             for (int i = 0; i < register; i++)
             {
