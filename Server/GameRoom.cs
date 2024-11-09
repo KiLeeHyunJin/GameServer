@@ -25,16 +25,22 @@ namespace Server
         {
             _pendingList.Add(segment);
         }
-
+        int count = 0;
         public void Flush()
         {
-            foreach (var s in _sessions)
+            Console.WriteLine($"Flush Call Count {this.count++}");
+            int count = _sessions.Count;
+            if(count == 0)
             {
-                s.Send(_pendingList);
+                return;
             }
-            //Console.WriteLine($"Flush {_sessions.Count} Item");
-            _pendingList.Clear();
 
+            for (int i = 0; i < count; i++)
+            {
+                _sessions[i].Send(_pendingList);
+            }
+            _pendingList.Clear();
+            //Console.WriteLine($"Job Flush {count} Item");
         }
 
         public void Enter(ClientSession session)

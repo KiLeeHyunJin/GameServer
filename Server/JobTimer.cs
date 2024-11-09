@@ -24,7 +24,7 @@ namespace Server
         public void Push(Action action, int tickAfter = 0)
         {
             JobTimerElem job;
-            job.excTick = tickAfter;
+            job.excTick = System.Environment.TickCount + tickAfter;
             job.action = action;
 
             lock(_lock)

@@ -37,11 +37,10 @@ internal class PacketHandler
         {
             return;
         }
-        Console.WriteLine($"{p.posX},{p.posZ}");
+        //Console.WriteLine($"{p.posX},{p.posZ}");
         GameRoom room = clientSession.Room;
         if(room == null)
         {
-            
             Console.WriteLine($"Room is Invalid {clientSession.SessionId}");
         }
         else if(p == null)
