@@ -31,7 +31,7 @@ namespace DummyClient
                             remoteEndPoint, 
                             () => { return SessionManager.Instance.Generate(); },
                             connect,
-                            50);
+                            10);
                     }
                 }
             }
