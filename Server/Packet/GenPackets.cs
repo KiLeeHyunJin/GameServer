@@ -12,8 +12,8 @@ public enum PacketID
 	C_Attck = 3,
 	C_Chat = 4,
 	C_LeaveGame = 5,
-	C_Move = 6,
-	S_EnterId = 7,
+	C_EndGame = 6,
+	C_Move = 7,
 	S_BroadcastEnterGame = 8,
 	S_BroadcastLeaveGame = 9,
 	S_BroadcastMove = 10,
@@ -243,6 +243,44 @@ public class C_LeaveGame : IPacket
     }
 }
 
+public class C_EndGame : IPacket
+{
+    public bool endGameState;
+
+    public ushort Protocol { get {return (ushort)PacketID.C_EndGame; } }
+
+    public void Read(ArraySegment<byte> segment)
+    {
+        ushort count = 4;
+        ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
+        
+        this.endGameState = BitConverter.ToBoolean(s.Slice(count, s.Length - count));
+		count += sizeof(bool);
+		
+    }
+
+    public ArraySegment<byte> Write()
+    {
+        ArraySegment<byte> segment = SendBufferHelper.Open(4096);
+        ushort count = 0;
+
+        bool success = true;
+
+        Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
+        count += sizeof(ushort);
+
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_EndGame);
+        count += sizeof(ushort);
+
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.endGameState);
+		count += sizeof(bool);
+		
+
+        success &= BitConverter.TryWriteBytes(s, count);
+        return success ? SendBufferHelper.Close(count) : null;
+    }
+}
+
 public class C_Move : IPacket
 {
     public float posX;
@@ -288,44 +326,6 @@ public class C_Move : IPacket
 		
 		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.posZ);
 		count += sizeof(float);
-		
-
-        success &= BitConverter.TryWriteBytes(s, count);
-        return success ? SendBufferHelper.Close(count) : null;
-    }
-}
-
-public class S_EnterId : IPacket
-{
-    public short playerId;
-
-    public ushort Protocol { get {return (ushort)PacketID.S_EnterId; } }
-
-    public void Read(ArraySegment<byte> segment)
-    {
-        ushort count = 4;
-        ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
-        
-        this.playerId = BitConverter.ToInt16(s.Slice(count, s.Length - count));
-		count += sizeof(short);
-		
-    }
-
-    public ArraySegment<byte> Write()
-    {
-        ArraySegment<byte> segment = SendBufferHelper.Open(4096);
-        ushort count = 0;
-
-        bool success = true;
-
-        Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
-        count += sizeof(ushort);
-
-        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.S_EnterId);
-        count += sizeof(ushort);
-
-        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
-		count += sizeof(short);
 		
 
         success &= BitConverter.TryWriteBytes(s, count);

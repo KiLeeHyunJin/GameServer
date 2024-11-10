@@ -11,7 +11,7 @@ namespace Server
         static SessionManager _session = new();
         public static SessionManager Instance { get { return _session; } }
 
-        int _sessionId = 0;
+        short _sessionId = 0;
 
         Dictionary<int, ClientSession> _sessions = new Dictionary<int, ClientSession>();
         object _lock = new object();
@@ -20,7 +20,7 @@ namespace Server
         {
             lock(_lock)
             {
-                int sessionId = ++_sessionId;
+                short sessionId = ++_sessionId;
                 ClientSession session = new()
                 {
                     SessionId = sessionId

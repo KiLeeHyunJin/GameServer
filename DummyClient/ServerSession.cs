@@ -12,6 +12,8 @@ namespace DummyClient
         {
             Console.WriteLine($"OnConnected Server : {endPoint}");
 
+            Thread.Sleep(1000);
+            Send(new C_EndGame().Write());
         }
 
 

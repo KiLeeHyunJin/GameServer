@@ -9,19 +9,22 @@ internal class PacketHandler
     {
         S_Chat p = packet as S_Chat;
         ServerSession serverSession = session as ServerSession;
-        //Console.WriteLine($"{p.playerId} : {p.chat}");
+        Console.WriteLine($"{p.playerId} : {p.chat}");
         //Debug.Log($"{p.playerId} : {p.chat}");
     }
+
     public static void S_BroadcastLeaveGameHandler(PacketSession session, IPacket packet)
     {
         S_BroadcastLeaveGame p = packet as S_BroadcastLeaveGame;
         ServerSession serverSession = session as ServerSession;
+        Console.WriteLine($"Exit Player Id : {p.playerId}");
     }
 
     public static void S_BroadcastEnterGameHandler(PacketSession session, IPacket packet)
     {
         S_BroadcastEnterGame p = packet as S_BroadcastEnterGame;
         ServerSession serverSession = session as ServerSession;
+        Console.WriteLine($"Enter Player Id : {p.playerId}");
     }
     public static void S_BroadcastMoveHandler(PacketSession session, IPacket packet)
     {
@@ -34,24 +37,20 @@ internal class PacketHandler
         ServerSession serverSession = session as ServerSession;
     }
 
-    public static void S_EnterIdHandler(PacketSession session, IPacket packet)
-    {
-        S_EnterId p = packet as S_EnterId;
-        ServerSession serverSession = session as ServerSession;
-    }
-
-
-
     public static void S_BanPickHandler(PacketSession session, IPacket packet)
     {
         S_BanPick p = packet as S_BanPick;
         ServerSession serverSession = session as ServerSession;
+        Console.WriteLine($"Ban Player ID : {p.playerId}, Ban Idx : {p.banId}");
+
     }
 
     public static void S_PickUpHandler(PacketSession session, IPacket packet)
     {
         S_PickUp p = packet as S_PickUp;
         ServerSession serverSession = session as ServerSession;
+        Console.WriteLine($"Pick Player ID : {p.playerId}, Pick Idx : {p.pickIdx}");
+
 
     }
 
@@ -59,14 +58,14 @@ internal class PacketHandler
     {
         S_Attck p = packet as S_Attck;
         ServerSession serverSession = session as ServerSession;
-
+        Console.WriteLine($"Attack Player ID : {p.playerId}, Attack Idx : {p.atckId}, Skill Type : {p.skillId}");
     }
 
     public static void S_ResultHandler(PacketSession session, IPacket packet)
     {
         S_Result p = packet as S_Result;
         ServerSession serverSession = session as ServerSession;
-
+        Console.WriteLine($"EndGame");
     }
 
 }

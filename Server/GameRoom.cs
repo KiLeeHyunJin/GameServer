@@ -9,16 +9,17 @@ namespace Server
 {
     public class GameRoom : IJob
     {
-        class UniCast
+        struct UniCast
         {
             public ArraySegment<byte> _pending;
-            public ClientSession _target;
+            public short _sendId;
         }
 
         List<ClientSession> _sessions = new(2);
         List<ArraySegment<byte>> _pendingList = new();
         List<UniCast> _unicastList = new();
-
+        bool[] resultCheck = new bool[2];
+        int resultState = 0;
         Job _queue = new();
         bool _ready = true;
         public int RoomIndex { get; set; }
@@ -50,9 +51,9 @@ namespace Server
             _pendingList.Add(segment);
         }
 
-        public void Unicast(ArraySegment<byte> segment, ClientSession session)
+        public void Unicast(ArraySegment<byte> segment, short targetId)
         {
-            _unicastList.Add(new() { _pending = segment, _target = session });
+            _unicastList.Add(new() { _pending = segment, _sendId = targetId });
         }
 
         public void Flush()
@@ -67,14 +68,19 @@ namespace Server
                 _pendingList.Clear();
             }
 
-            count = _unicastList.Count;
-            if(count > 0)
+            if(count > 1)
             {
+                count = _unicastList.Count;
+                if(count == 0)
+                {
+                    return;
+                }
+
                 ClientSession targetSession;
                 ArraySegment<byte> pending;
                 for (int i = 0; i < count; i++)
                 {
-                    targetSession = _unicastList[i]._target;
+                    targetSession = _unicastList[i]._sendId == 0 ? _sessions[1] : _sessions[0];
                     pending = _unicastList[i]._pending;
                     targetSession.Send(pending);
                 }
@@ -85,9 +91,13 @@ namespace Server
         public void Enter(ClientSession session)
         {
             session.SetRoom = this;
+            session.SessionId = (short)_sessions.Count;
 
-            int count = _sessions.Count;
-            session.SessionId = count;
+            S_BroadcastEnterGame enter = new()
+            {
+                playerId = (short)session.SessionId
+            };
+            Broadcast(enter.Write());
 
             _sessions.Add(session);
 
@@ -106,13 +116,6 @@ namespace Server
                 });
             }
             session.Send(players.Write());
-
-            S_BroadcastEnterGame enter = new()
-            {
-                playerId = (short)session.SessionId
-            };
-
-            Broadcast(enter.Write());
         }
 
         public void Ban(ClientSession session, C_BanPick packet)
@@ -121,26 +124,34 @@ namespace Server
             { 
                 banId = packet.banId
             };
-
+            Unicast(p.Write(), session.SessionId);
         }
 
         public void Pick(ClientSession session, C_PickUp packet)
         {
-
+            S_PickUp p = new()
+            {
+                pickIdx = packet.pickIdx,
+                playerId = (short)session.SessionId
+            };
+            Unicast(p.Write(), session.SessionId);
         }
 
         public void Attack(ClientSession session, C_Attck packet)
         {
-
+            S_Attck p = new()
+            {
+                playerId = session.SessionId,
+                atckId = packet.atckId,
+                skillId = packet.skillId,
+                damValue = packet.damValue
+            };
+            Unicast(p.Write(), session.SessionId);
         }
 
         public void Leave(ClientSession session)
         {
             _sessions.Remove(session);
-            if(_ready == false)
-            {
-                RemoveRoom();
-            }
 
             S_BroadcastLeaveGame leaveGame = new()
             {
@@ -148,6 +159,11 @@ namespace Server
             };
 
             Broadcast(leaveGame.Write());
+            if(_sessions.Count == 1)
+            {
+                session.Disconnect();
+                RemoveRoom();
+            }
         }
 
         public void Chat(ClientSession session, C_Chat packet)
@@ -158,20 +174,23 @@ namespace Server
             Broadcast(c.Write());
         }
 
-        public void Move(ClientSession session, C_Move packet)
+        public void Result(ClientSession session)
         {
-            session.PosX = packet.posX;
-            session.PosY = packet.posX;
-            session.PosZ = packet.posZ;
-
-            S_BroadcastMove move = new()
+            resultCheck[session.SessionId] = true;
+            foreach (var item in resultCheck)
             {
-                playerId = (short)session.SessionId
-            };
-
-            Broadcast(move.Write());
+                if(item == false)
+                {
+                    return;
+                }
+            }
+            foreach (var s in _sessions)
+            {
+                S_Result p = new()
+                { };
+                Broadcast(p.Write());
+            }
         }
-
 
     }
 }

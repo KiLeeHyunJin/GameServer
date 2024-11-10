@@ -43,16 +43,16 @@ namespace DummyClient
 
             while (true) 
             {   
-                try
-                {
-                    SessionManager.Instance.SendForEach();
-                }
-                catch(Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+                //try
+                //{
+                //    SessionManager.Instance.SendForEach();
+                //}
+                //catch(Exception e)
+                //{
+                //    Console.WriteLine(e.Message);
+                //}
 
-                Thread.Sleep(1500);
+                //Thread.Sleep(1500);
             }
         }
     }

@@ -13,7 +13,7 @@ namespace Server
         public GameRoom SetRoom { set { _room = value; } }
         public GameRoom Room { get { return _room; } }
         GameRoom _room;
-        public int SessionId { get; set; }
+        public short SessionId { get; set; }
         public float PosX { get; set; }
         public float PosY { get; set; }
         public float PosZ { get; set; }

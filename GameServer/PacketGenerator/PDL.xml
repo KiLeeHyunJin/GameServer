@@ -23,16 +23,15 @@
 		<short name ="playerId"/>
 	</packet>
 
+	<packet name ="C_EndGame">
+		<bool name ="endGameState"/>
+	</packet>
 
 
 	<packet name ="C_Move">
 		<float name="posX"/>
 		<float name="posY"/>
 		<float name="posZ"/>
-	</packet>
-
-	<packet name ="S_EnterId">
-		<short name ="playerId"/>
 	</packet>
 
 	<packet name ="S_BroadcastEnterGame">
