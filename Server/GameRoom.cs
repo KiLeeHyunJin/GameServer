@@ -17,13 +17,12 @@ namespace Server
 
         List<ClientSession> _sessions = new(2);
         List<ArraySegment<byte>> _pendingList = new();
-        List<UniCast> _unicastList = new();
+        List<UniCast> _unicastList = new(3);
+
         bool[] resultCheck = new bool[2];
-        int resultState = 0;
-        Job _queue = new();
         bool _ready = true;
-        public int RoomIndex { get; set; }
-        public int PlayerCount { get { return _sessions.Count; } }
+
+        Job _queue = new();
         public Lobby Lobby { get; set; }
 
         public void RemoveRoom()
@@ -98,7 +97,6 @@ namespace Server
                 {
                     Console.WriteLine(e.Message);
                 }
-                _unicastList.Clear();
             }
         }
 
@@ -109,7 +107,7 @@ namespace Server
 
             S_BroadcastEnterGame enter = new()
             {
-                playerId = (short)session.SessionId
+                playerId = session.SessionId
             };
             Broadcast(enter.Write());
 
@@ -132,6 +130,15 @@ namespace Server
             session.Send(players.Write());
         }
 
+        public void LastBan(ClientSession session, C_BanPick packet)
+        {
+            S_LastBanPick p = new()
+            {
+                lastBanIdx = packet.banId
+            };
+            Unicast(p.Write(), session.SessionId);
+        }
+
         public void Ban(ClientSession session, C_BanPick packet)
         {
             S_BanPick p = new()
@@ -146,7 +153,6 @@ namespace Server
             S_PickUp p = new()
             {
                 pickIdx = packet.pickIdx,
-                playerId = (short)session.SessionId
             };
             Unicast(p.Write(), session.SessionId);
         }
@@ -155,7 +161,6 @@ namespace Server
         {
             S_Attck p = new()
             {
-                playerId = session.SessionId,
                 atckId = packet.atckId,
                 skillId = packet.skillId,
                 damValue = packet.damValue
@@ -198,12 +203,9 @@ namespace Server
                     return;
                 }
             }
-            foreach (var s in _sessions)
-            {
-                S_Result p = new()
-                { };
-                Broadcast(p.Write());
-            }
+            S_Result p = new();
+            ArraySegment<byte> s = p.Write();
+            Broadcast(s);
         }
 
     }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DummyClient
+﻿namespace DummyClient
 {
     internal class SessionManager
     {
@@ -14,29 +8,28 @@ namespace DummyClient
         object _lock = new();
         Random _rand = new();
 
-        public void SendForEach()
+        public void SendForEach(bool  state)
         {
-            lock(_lock)
+            if(state)
             {
-                foreach (var session in _sessions)
+                lock (_lock)
                 {
-                    C_Move p = new();
-                    p.posX = _rand.Next(-50,50);
-                    p.posY = 0;
-                    p.posZ = _rand.Next(-50, 50);
-                    C_Chat c = new();
-                    c.chat = $"Hellow Server!";
-                    ArraySegment<byte> segment = p.Write();
-                    session.Send(segment);
-                    ArraySegment<byte> sc = c.Write();
-                    session.Send(sc);
+                    foreach (var session in _sessions)
+                    {
+                        C_Chat c = new()
+                        {
+                            chat = $"Hellow Server!"
+                        };
+                        ArraySegment<byte> s = c.Write();
+                        session.Send(s);
+                    }
                 }
             }
         }
 
         public ServerSession Generate()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 ServerSession session = new();
                 _sessions.Add(session);

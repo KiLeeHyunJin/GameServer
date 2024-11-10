@@ -4,9 +4,13 @@
 	<packet name ="C_BanPick">
 		<short name ="banId"/>
 	</packet>
-
+	
 	<packet name ="C_PickUp">
 		<short name ="pickIdx"/>
+	</packet>
+	
+	<packet name ="C_LastBanPick">
+		<short name ="banId"/>
 	</packet>
 
 	<packet name ="C_Attck">
@@ -27,25 +31,17 @@
 		<bool name ="endGameState"/>
 	</packet>
 
-
-	<packet name ="C_Move">
-		<float name="posX"/>
-		<float name="posY"/>
-		<float name="posZ"/>
-	</packet>
-
+	
+	
+	
+	
 	<packet name ="S_BroadcastEnterGame">
 		<short name ="playerId"/>
 	</packet>
 	
-	
 	<packet name ="S_BroadcastLeaveGame">
 		<short name ="playerId"/>
 		<short name ="isMine"/>
-	</packet>
-
-	<packet name ="S_BroadcastMove">
-		<short name ="playerId"/>
 	</packet>
 
 	<packet name ="S_PlayerList">
@@ -55,20 +51,19 @@
 		</list>
 	</packet>
 
-	
-
 	<packet name ="S_BanPick">
-		<short name ="playerId"/>
 		<short name ="banId"/>
 	</packet>
 
 	<packet name ="S_PickUp">
-		<short name ="playerId"/>
 		<short name ="pickIdx"/>
 	</packet>
 
+	<packet name ="S_LastBanPick">
+		<short name ="lastBanIdx"/>
+	</packet>
+
 	<packet name ="S_Attck">
-		<short name ="playerId"/>
 		<short name ="atckId"/>
 		<short name ="skillId"/>
 		<short name ="damValue"/>

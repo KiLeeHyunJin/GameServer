@@ -11,7 +11,7 @@ namespace DummyClient
 
         static void Main(string[] args)
         {
-            Define.Connect connect = Define.Connect.Domain;
+            Define.Connect connect = Define.Connect.Local;
 
             string domain = "pkc-5000.shop";
             string local = Dns.GetHostName();
@@ -46,17 +46,16 @@ namespace DummyClient
 
 
             while (true) 
-            {   
-                //try
-                //{
-                //    SessionManager.Instance.SendForEach();
-                //}
-                //catch(Exception e)
-                //{
-                //    Console.WriteLine(e.Message);
-                //}
-
-                //Thread.Sleep(1500);
+            {
+                try
+                {
+                    SessionManager.Instance.SendForEach(true);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                Thread.Sleep(1500);
             }
         }
     }

@@ -26,6 +26,8 @@ public class PacketManager
         _handler.Add((ushort)PacketID.C_BanPick, PacketHandler.C_BanPickHandler);
        _makeFunc.Add((ushort)PacketID.C_PickUp, MakePacket<C_PickUp>);
         _handler.Add((ushort)PacketID.C_PickUp, PacketHandler.C_PickUpHandler);
+       _makeFunc.Add((ushort)PacketID.C_LastBanPick, MakePacket<C_LastBanPick>);
+        _handler.Add((ushort)PacketID.C_LastBanPick, PacketHandler.C_LastBanPickHandler);
        _makeFunc.Add((ushort)PacketID.C_Attck, MakePacket<C_Attck>);
         _handler.Add((ushort)PacketID.C_Attck, PacketHandler.C_AttckHandler);
        _makeFunc.Add((ushort)PacketID.C_Chat, MakePacket<C_Chat>);
@@ -34,8 +36,6 @@ public class PacketManager
         _handler.Add((ushort)PacketID.C_LeaveGame, PacketHandler.C_LeaveGameHandler);
        _makeFunc.Add((ushort)PacketID.C_EndGame, MakePacket<C_EndGame>);
         _handler.Add((ushort)PacketID.C_EndGame, PacketHandler.C_EndGameHandler);
-       _makeFunc.Add((ushort)PacketID.C_Move, MakePacket<C_Move>);
-        _handler.Add((ushort)PacketID.C_Move, PacketHandler.C_MoveHandler);
 
     }
 
