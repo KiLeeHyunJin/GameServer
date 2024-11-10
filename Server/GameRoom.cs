@@ -9,8 +9,15 @@ namespace Server
 {
     public class GameRoom : IJob
     {
+        class UniCast
+        {
+            public ArraySegment<byte> _pending;
+            public ClientSession _target;
+        }
+
         List<ClientSession> _sessions = new(2);
         List<ArraySegment<byte>> _pendingList = new();
+        List<UniCast> _unicastList = new();
 
         Job _queue = new();
         bool _ready = true;
@@ -43,20 +50,47 @@ namespace Server
             _pendingList.Add(segment);
         }
 
+        public void Unicast(ArraySegment<byte> segment, ClientSession session)
+        {
+            _unicastList.Add(new() { _pending = segment, _target = session });
+        }
+
         public void Flush()
         {
             int count = _sessions.Count;
-            for (int i = 0; i < count; i++)
+            if(count > 0)
             {
-                _sessions[i].Send(_pendingList);
+                for (int i = 0; i < count; i++)
+                {
+                    _sessions[i].Send(_pendingList);
+                }
+                _pendingList.Clear();
             }
-            _pendingList.Clear();
+
+            count = _unicastList.Count;
+            if(count > 0)
+            {
+                ClientSession targetSession;
+                ArraySegment<byte> pending;
+                for (int i = 0; i < count; i++)
+                {
+                    targetSession = _unicastList[i]._target;
+                    pending = _unicastList[i]._pending;
+                    targetSession.Send(pending);
+                }
+                _unicastList.Clear();
+            }
         }
 
         public void Enter(ClientSession session)
         {
             session.SetRoom = this;
+
+            int count = _sessions.Count;
+            session.SessionId = count;
+
             _sessions.Add(session);
+
             if(_sessions.Count > 1)
             {
                 _ready = false;
@@ -68,23 +102,36 @@ namespace Server
                 players.players.Add(new S_PlayerList.Player()
                 {
                     isSelf = (s == session),
-                    playerId = (short)s.SessionId,
-                    posX = s.PosX,
-                    posY = s.PosY,
-                    posZ = s.PosZ
+                    playerId = (short)s.SessionId
                 });
             }
             session.Send(players.Write());
 
             S_BroadcastEnterGame enter = new()
             {
-                playerId = (short)session.SessionId,
-                posX = 0,
-                posY = 0,
-                posZ = 0
+                playerId = (short)session.SessionId
             };
 
             Broadcast(enter.Write());
+        }
+
+        public void Ban(ClientSession session, C_BanPick packet)
+        {
+            S_BanPick p = new()
+            { 
+                banId = packet.banId
+            };
+
+        }
+
+        public void Pick(ClientSession session, C_PickUp packet)
+        {
+
+        }
+
+        public void Attack(ClientSession session, C_Attck packet)
+        {
+
         }
 
         public void Leave(ClientSession session)
@@ -101,12 +148,6 @@ namespace Server
             };
 
             Broadcast(leaveGame.Write());
-            //if (isFinish == false && _sessions.Count > 0)
-            //{
-            //    S_Result result = new();
-            //    result.result = true;
-            //    _sessions[0].Send(result.Write());
-            //}
         }
 
         public void Chat(ClientSession session, C_Chat packet)
@@ -125,10 +166,7 @@ namespace Server
 
             S_BroadcastMove move = new()
             {
-                playerId = (short)session.SessionId,
-                posX = session.PosX,
-                posY = session.PosY,
-                posZ = session.PosZ
+                playerId = (short)session.SessionId
             };
 
             Broadcast(move.Write());

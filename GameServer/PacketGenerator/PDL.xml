@@ -30,32 +30,29 @@
 		<float name="posY"/>
 		<float name="posZ"/>
 	</packet>
-	
+
+	<packet name ="S_EnterId">
+		<short name ="playerId"/>
+	</packet>
+
 	<packet name ="S_BroadcastEnterGame">
 		<short name ="playerId"/>
-		<float name="posX"/>
-		<float name="posY"/>
-		<float name="posZ"/>
 	</packet>
+	
 	
 	<packet name ="S_BroadcastLeaveGame">
 		<short name ="playerId"/>
+		<short name ="isMine"/>
 	</packet>
 
 	<packet name ="S_BroadcastMove">
 		<short name ="playerId"/>
-		<float name="posX"/>
-		<float name="posY"/>
-		<float name="posZ"/>
 	</packet>
 
 	<packet name ="S_PlayerList">
 		<list name ="player">
 			<bool name ="isSelf"/>
 			<short name ="playerId"/>
-			<float name="posX"/>
-			<float name="posY"/>
-			<float name="posZ"/>
 		</list>
 	</packet>
 

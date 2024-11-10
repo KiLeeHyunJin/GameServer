@@ -34,6 +34,12 @@ internal class PacketHandler
         ServerSession serverSession = session as ServerSession;
     }
 
+    public static void S_EnterIdHandler(PacketSession session, IPacket packet)
+    {
+        S_EnterId p = packet as S_EnterId;
+        ServerSession serverSession = session as ServerSession;
+    }
+
 
 
     public static void S_BanPickHandler(PacketSession session, IPacket packet)
