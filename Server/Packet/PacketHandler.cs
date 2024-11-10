@@ -4,116 +4,96 @@ using System.Text.RegularExpressions;
 
 internal class PacketHandler
 {
+
+    private static bool ClientSessionCheck(PacketSession session, IPacket packet)
+    {
+        ClientSession clientSession = session as ClientSession;
+        if(clientSession == null)
+        {
+            Console.WriteLine($"ClientSession is Invalid {(PacketID)packet.Protocol}");
+            return false;
+        }
+        if (clientSession.Room == null)
+        {
+            Console.WriteLine($"Room is Invalid {clientSession.SessionId} {(PacketID)packet.Protocol}");
+            return false;
+        }
+        return true;
+    }
     public static void C_ChatHandler(PacketSession session, IPacket packet)
     {
         C_Chat p = packet as C_Chat;
-        ClientSession clientSession = session as ClientSession;
-        if (clientSession.Room == null)
-        {   return; }
-
-        GameRoom room = clientSession.Room;
+        if (ClientSessionCheck(session, packet))
+        {
+            ClientSession clientSession = session as ClientSession;
+            GameRoom room = clientSession.Room;
+            room.Push(() => room.Chat(clientSession, p));
+        }
         //Console.WriteLine("Chat Handler");
-        room.Push(() => room.Chat(clientSession, p));
     }
 
     public static void C_EndGameHandler(PacketSession session, IPacket packet)
     {
         C_EndGame p = packet as C_EndGame;
-        ClientSession clientSession = session as ClientSession;
-        GameRoom room = clientSession.Room;
-        room.Push(() => room.Result(clientSession));
+        if (ClientSessionCheck(session, packet))
+        {
+            ClientSession clientSession = session as ClientSession;
+            GameRoom room = clientSession.Room;
+            room.Push(() => room.Result(clientSession));
+        }
     }
 
     public static void C_LeaveGameHandler(PacketSession session, IPacket packet)
     {
-        ClientSession clientSession = session as ClientSession;
-        if(clientSession == null)
+        if (ClientSessionCheck(session, packet))
         {
-            return;
+            ClientSession clientSession = session as ClientSession;
+            GameRoom room = clientSession.Room;
+            room.Push(() => room.Leave(clientSession));
         }
-        GameRoom room = clientSession.Room;
-        room.Push(() => room.Leave(clientSession));
     }
 
     public static void C_MoveHandler(PacketSession session, IPacket packet)
     {
-        C_Move p = packet as C_Move;
-        ClientSession clientSession = session as ClientSession;
-        if (clientSession == null)
+        if (ClientSessionCheck(session, packet))
         {
-            return;
-        }
-        GameRoom room = clientSession.Room;
-        if(room == null)
-        {
-            Console.WriteLine($"Room is Invalid {clientSession.SessionId}");
-        }
-        else if(p == null)
-        {
-            Console.WriteLine($"Packet is Invalid");
-        }
-        else
-        {
+            //ClientSession clientSession = session as ClientSession;
+            //GameRoom room = clientSession.Room;
+            C_Move p = packet as C_Move;
             Console.WriteLine($"{p.posX},{p.posZ}");
-            // room.Push(() => room.Move(clientSession, p));
         }
     }
 
 
     public static void C_BanPickHandler(PacketSession session, IPacket packet)
     {
-        C_BanPick p = packet as C_BanPick;
-        ClientSession clientSession = session as ClientSession;
-        GameRoom room = clientSession.Room;
-        if (room == null)
+        if (ClientSessionCheck(session, packet))
         {
-            Console.WriteLine($"Room is Invalid {clientSession.SessionId}");
-        }
-        else if (p == null)
-        {
-            Console.WriteLine($"Packet is Invalid");
-        }
-        else
-        {
-            //Console.WriteLine($"{p.posX},{p.posZ}")
-            room.Push(() => room.Ban(clientSession,p));
+            C_BanPick p = packet as C_BanPick;
+            ClientSession clientSession = session as ClientSession;
+            GameRoom room = clientSession.Room;
+            room.Push(() => room.Ban(clientSession, p));
         }
     }
 
     public static void C_PickUpHandler(PacketSession session, IPacket packet)
     {
-        C_PickUp p = packet as C_PickUp;
-        ClientSession clientSession = session as ClientSession;
-        GameRoom room = clientSession.Room;
-        if (room == null)
+        if (ClientSessionCheck(session, packet))
         {
-            Console.WriteLine($"Room is Invalid {clientSession.SessionId}");
-        }
-        else if (p == null)
-        {
-            Console.WriteLine($"Packet is Invalid");
-        }
-        else
-        {
+            C_PickUp p = packet as C_PickUp;
+            ClientSession clientSession = session as ClientSession;
+            GameRoom room = clientSession.Room;
             room.Push(() => room.Pick(clientSession, p));
         }
     }
 
     public static void C_AttckHandler(PacketSession session, IPacket packet)
     {
-        C_Attck p = packet as C_Attck;
-        ClientSession clientSession = session as ClientSession;
-        GameRoom room = clientSession.Room;
-        if (room == null)
+        if (ClientSessionCheck(session, packet))
         {
-            Console.WriteLine($"Room is Invalid {clientSession.SessionId}");
-        }
-        else if (p == null)
-        {
-            Console.WriteLine($"Packet is Invalid");
-        }
-        else
-        {
+            C_Attck p = packet as C_Attck;
+            ClientSession clientSession = session as ClientSession;
+            GameRoom room = clientSession.Room;
             room.Push(() => room.Attack(clientSession, p));
         }
     }

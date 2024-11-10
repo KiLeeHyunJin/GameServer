@@ -61,9 +61,16 @@ namespace Server
             int count = _sessions.Count;
             if(count > 0)
             {
-                for (int i = 0; i < count; i++)
+                try
                 {
-                    _sessions[i].Send(_pendingList);
+                    for (int i = 0; i < count; i++)
+                    {
+                        _sessions[i].Send(_pendingList);
+                    }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
                 }
                 _pendingList.Clear();
             }
@@ -78,11 +85,18 @@ namespace Server
 
                 ClientSession targetSession;
                 ArraySegment<byte> pending;
-                for (int i = 0; i < count; i++)
+                try
                 {
-                    targetSession = _unicastList[i]._sendId == 0 ? _sessions[1] : _sessions[0];
-                    pending = _unicastList[i]._pending;
-                    targetSession.Send(pending);
+                    for (int i = 0; i < count; i++)
+                    {
+                        targetSession = _unicastList[i]._sendId == 0 ? _sessions[1] : _sessions[0];
+                        pending = _unicastList[i]._pending;
+                        targetSession.Send(pending);
+                    }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
                 }
                 _unicastList.Clear();
             }
@@ -159,7 +173,7 @@ namespace Server
             };
 
             Broadcast(leaveGame.Write());
-            if(_sessions.Count == 1)
+            if(_sessions.Count <= 1)
             {
                 session.Disconnect();
                 RemoveRoom();

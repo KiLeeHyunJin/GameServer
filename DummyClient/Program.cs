@@ -11,10 +11,14 @@ namespace DummyClient
 
         static void Main(string[] args)
         {
+            Define.Connect connect = Define.Connect.Domain;
+
             string domain = "pkc-5000.shop";
             string local = Dns.GetHostName();
-            IPAddress[] addresses = Dns.GetHostAddresses(local);
-            Define.Connect connect = Define.Connect.Local;
+            
+            string connectStr = connect == Define.Connect.Local ? local : domain;
+            IPAddress[] addresses = Dns.GetHostAddresses(connectStr);
+
             Thread.Sleep(1000);
 
             try

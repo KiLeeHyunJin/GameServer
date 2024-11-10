@@ -55,6 +55,7 @@ namespace ServerCore
                     try
                     {
                         Console.WriteLine($"Create Session");
+
                         session.Start(socket);
                         session.OnConnected(socket.RemoteEndPoint);
                     }

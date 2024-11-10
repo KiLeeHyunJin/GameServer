@@ -20,6 +20,10 @@ namespace Server
         {
             lock(_lock)
             {
+                if(_sessionId == short.MaxValue)
+                {
+                    _sessionId = 0;
+                }
                 short sessionId = ++_sessionId;
                 ClientSession session = new()
                 {
