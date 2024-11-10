@@ -50,9 +50,9 @@ namespace Server
             _pendingList.Add(segment);
         }
 
-        public void Unicast(ArraySegment<byte> segment, short targetId)
+        public void Unicast(ArraySegment<byte> segment, short senderId)
         {
-            _unicastList.Add(new() { _pending = segment, _sendId = targetId });
+            _unicastList.Add(new() { _pending = segment, _sendId = senderId });
         }
 
         public void Flush()
@@ -109,7 +109,7 @@ namespace Server
             {
                 playerId = session.SessionId
             };
-            Broadcast(enter.Write());
+            Unicast(enter.Write(), enter.playerId);
 
             _sessions.Add(session);
 
