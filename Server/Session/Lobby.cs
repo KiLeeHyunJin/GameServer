@@ -9,12 +9,28 @@ namespace Server
     {
         List<GameRoom> readyList = new List<GameRoom>(3);
         List<GameRoom> battleList = new List<GameRoom>(3);
-
+        int readyCount;
+        int battleCount;
         public void Flush()
         {
-            Console.WriteLine(
-                $"ReadyRoom Count : {readyList.Count} " +
-                $"BattleRoom Count : {battleList.Count}");
+            bool change = false;
+            if(readyCount != readyList.Count)
+            {
+                readyCount = readyList.Count;
+                change = true;
+            }
+            if(battleCount != battleList.Count)
+            {
+                battleCount = battleList.Count;
+                change = true;
+            }
+            if(change)
+            {
+                Console.WriteLine(
+                    $"ReadyRoom Count : {readyList.Count} " +
+                    $"BattleRoom Count : {battleList.Count}");
+            }
+
             try
             {
                 for (int i = 0; i < readyList.Count; i++)
