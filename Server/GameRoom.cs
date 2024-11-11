@@ -97,6 +97,7 @@ namespace Server
                 {
                     Console.WriteLine(e.Message);
                 }
+                _unicastList.Clear();
             }
         }
 
