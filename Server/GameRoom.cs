@@ -18,6 +18,7 @@ namespace Server
         List<ClientSession> _sessions = new(2);
         List<ArraySegment<byte>> _pendingList = new();
         List<UniCast> _unicastList = new(3);
+        bool _removeRoom = false;
 
         bool[] resultCheck = new bool[2];
         bool _ready = true;
@@ -99,6 +100,11 @@ namespace Server
                 }
                 _unicastList.Clear();
             }
+
+            if(_removeRoom)
+            {
+                RemoveRoom();
+            }
         }
 
         public void Enter(ClientSession session)
@@ -131,12 +137,10 @@ namespace Server
             session.Send(players.Write());
         }
 
-        public void LastBan(ClientSession session, C_BanPick packet)
+        public void LastBan(ClientSession session, C_LastBanPick packet)
         {
-            S_LastBanPick p = new()
-            {
-                lastBanIdx = packet.banId
-            };
+            S_LastBanPick p = new();
+            p.lastBanIdx = packet.banId;
             Unicast(p.Write(), session.SessionId);
         }
 
@@ -179,10 +183,11 @@ namespace Server
             };
 
             Broadcast(leaveGame.Write());
-            if(_sessions.Count <= 1)
+
+            if(_sessions.Count != 0)
             {
                 session.Disconnect();
-                RemoveRoom();
+                _removeRoom = true;
             }
         }
 

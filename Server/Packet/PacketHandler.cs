@@ -57,7 +57,7 @@ internal class PacketHandler
     {
         if (ClientSessionCheck(session, packet.Protocol))
         {
-            C_BanPick p = packet as C_BanPick;
+            C_LastBanPick p = packet as C_LastBanPick;
             ClientSession clientSession = session as ClientSession;
             GameRoom room = clientSession.Room;
             room.Push(() => room.LastBan(clientSession, p));

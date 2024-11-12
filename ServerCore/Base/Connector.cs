@@ -25,7 +25,7 @@ namespace ServerCore
                 socket.ReceiveTimeout = 30000;
                 if(connect == Define.Connect.Domain)
                 {
-                    socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
+                    //socket.Bind(new IPEndPoint(IPAddress.Any, Define.PortNum));
                 }
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
 

@@ -11,6 +11,7 @@ namespace DummyClient
 
         static void Main(string[] args)
         {
+            ServerSession session = new();
             Define.Connect connect = Define.Connect.Local;
 
             string domain = "pkc-5000.shop";
@@ -33,7 +34,7 @@ namespace DummyClient
                         Connector connector = new Connector();
                         connector.Connect(
                             remoteEndPoint, 
-                            () => { return SessionManager.Instance.Generate(); },
+                            () => { return session; },
                             connect,
                             1);
                     }
@@ -56,6 +57,11 @@ namespace DummyClient
                     Console.WriteLine(e.Message);
                 }
                 Thread.Sleep(1500);
+                string input = Console.ReadLine();
+                if(int.TryParse(input, out int temp))
+                {
+                    session.Disconnect();
+                }
             }
         }
     }
