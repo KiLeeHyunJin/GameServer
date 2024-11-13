@@ -184,11 +184,8 @@ namespace Server
 
             Broadcast(leaveGame.Write());
 
-            if(_sessions.Count != 0)
-            {
-                session.Disconnect();
-                _removeRoom = true;
-            }
+            session.Disconnect();
+            _removeRoom = true;
         }
 
         public void Chat(ClientSession session, C_Chat packet)

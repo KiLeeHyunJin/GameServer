@@ -18,7 +18,10 @@ namespace Server
         {
             try
             {
-                _listener.Init(() => { return SessionManager.Instance.Generate(); });
+                _listener.Init(
+                    () => { return SessionManager.Instance.Generate(); },
+                    2,
+                    10);
             }
             catch (Exception e)
             {

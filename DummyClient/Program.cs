@@ -12,7 +12,7 @@ namespace DummyClient
         static void Main(string[] args)
         {
             ServerSession session = new();
-            Define.Connect connect = Define.Connect.Local;
+            Define.Connect connect = Define.Connect.Domain;
 
             string domain = "pkc-5000.shop";
             string local = Dns.GetHostName();

@@ -13,24 +13,7 @@ namespace Server
         int battleCount;
         public void Flush()
         {
-            bool change = false;
-            if(readyCount != readyList.Count)
-            {
-                readyCount = readyList.Count;
-                change = true;
-            }
-            if(battleCount != battleList.Count)
-            {
-                battleCount = battleList.Count;
-                change = true;
-            }
-            if(change)
-            {
-                Console.WriteLine(
-                    $"ReadyRoom Count : {readyList.Count} " +
-                    $"BattleRoom Count : {battleList.Count}");
-            }
-
+            ChangeState();
             try
             {
                 for (int i = 0; i < readyList.Count; i++)
@@ -49,6 +32,27 @@ namespace Server
                 Console.WriteLine(e.Message);
             }
 
+        }
+
+        private void ChangeState()
+        {
+            bool change = false;
+            if (readyCount != readyList.Count)
+            {
+                readyCount = readyList.Count;
+                change = true;
+            }
+            if (battleCount != battleList.Count)
+            {
+                battleCount = battleList.Count;
+                change = true;
+            }
+            if (change)
+            {
+                Console.WriteLine(
+                    $"ReadyRoom Count : {readyList.Count} " +
+                    $"BattleRoom Count : {battleList.Count}");
+            }
         }
 
         public void RemoveRoom(GameRoom room, bool readyRoom)
